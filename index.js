@@ -113,6 +113,7 @@ function StirFry(port, ip, callback) {
 	}
 
 	this.server = http.createServer(this.respond);
+	this.listen();
 }
 
 
