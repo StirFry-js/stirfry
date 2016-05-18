@@ -1,5 +1,5 @@
 //ANOTHER PASS WOOT!!!!
-var StirFry = require('../../index.js');
+var StirFry = require('../../stirfry.js');
 var http    = require('http');
 var app     = new StirFry(false);
 var server  = http.createServer(app.respond);
