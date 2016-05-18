@@ -14,18 +14,15 @@ module.exports.home = ((require.main || module).filename).split('/').slice(0, -1
  *
  *
  * */
-function StirFry(port, ip, callback) {
+function StirFry(port, ip) {
 	//If ip is not a string than it is the callback so just use '127.0.0.1' as the ip
 	var ipToUse = typeof ip == 'string' ? ip:'127.0.0.1';
-	//If typeof ip is a function than set callback to use as ip
-	var callbackToUse = typeof ip != 'string'
-	  ? //Now check if ip is undefined
-	  (typeof ip == 'undefined' ? port:ip)
-	  :callback
+	var listen = true;
+	//If port is a boolean
+	if (typeof port == 'boolean') listen = port;
 	//Initialize all of the properties
 	this.port     = port;
 	this.ip       = ipToUse;
-	this.callback = callback;
 	this.listens  = {
 		'get': [],
 		'post': [],
@@ -40,11 +37,9 @@ function StirFry(port, ip, callback) {
 		var asynchronous = {
 			start: function() {
 				waiting++;
-				console.log("waiting");
 			},
 			done: function() {
 				waiting--;
-				console.log("done");
 				if (waiting <= 0) {
 					res.end(sendData);
 				}
@@ -107,13 +102,15 @@ function StirFry(port, ip, callback) {
 
 		that._callGets(request, response, asynchronous);
 		if (waiting <= 0) {
-			asynchronous.done(true);
+			asynchronous.done();
 		}
 
 	}
 
 	this.server = http.createServer(this.respond);
-	this.listen();
+	if (listen) {
+		this.listen();
+	}
 }
 
 
@@ -309,7 +306,7 @@ StirFry.static = function(path, ending) {
 			//Generate a path that has index.{extension} if needed
 			var pathToUse = isDir ? combinePaths(combinedPath, 'index.' + module.exports.defaultExtension):combinedPath;
 			//Read the file now
-			res.sendFile(combinedPath);
+			res.sendFile(pathToUse);
 			async.end();
 		});
 	}
