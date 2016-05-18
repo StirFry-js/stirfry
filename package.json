@@ -2,7 +2,7 @@
   "name": "stirfry",
   "version": "0.2.4",
   "description": "Stir fry is a self contained and easy to use web framework.",
-  "main": "index.js",
+  "main": "stirfry.js",
   "repository": {
     "type": "git",
     "url": "http://www.github.com/squishybanana04/stirfry.git"
