@@ -18,7 +18,7 @@ function StirFry(port, ip) {
 	this.ip       = ipToUse;
 	this.listens  = {
 		'get': [],
-		'post': [],
+		'pre': [],
 		'start': [],
 		'end': [],
 		'exception': []
@@ -26,6 +26,9 @@ function StirFry(port, ip) {
 	var that = this;
 	//The function to call on a request
 	this.respond = function(req, res) {
+
+
+		var sendData = '';
 		var waiting = 0;
 		var asynchronous = {
 			start: function() {
@@ -39,14 +42,12 @@ function StirFry(port, ip) {
 			}
 		}
 		asynchronous.end = asynchronous.done;
-
-		var sendData = '';
 		//Create a request object
 		var request = {
 			cookies: parseCookies(req),
 			url: req.url,
 			method: req.method,
-			httpRequest: req
+			full: req
 		}
 
 		//Function to set a cookie
@@ -61,42 +62,37 @@ function StirFry(port, ip) {
 		//Create a response object
 		var response = {
 			//A function to send a file at a certain path
-			sendFile: function(path, callback) {
-				var callbackToUse = callback;
-				if (!callback) {
-					callbackToUse = (err) => console.log(JSON.stringify(err));
-				}
-				var fullPath = combinePaths(module.exports.home, path);
-				var self = this;
-				//Start an async process
-				asynchronous.start();
-				//Read the file at the path
-				fs.readFile(fullPath, function(err, data) {
-					if (err) {
-						callbackToUse(err);
-						self.send("");
-						asynchronous.end();
-						return;
-					}
-					//Send the data and end the async process after calling the callback
-					self.send(data.toString());
-					callbackToUse(false);
-					asynchronous.end();
-				})
-			},
+			#include sendfile.js;
 			//A function just to send data
 			send: function(data) {
 				sendData += data;
 			},
-			http: res
+			full: res
 		}
+		var preWaiting = 0;
+		//The asynchronous stuff for the preprocessor
+		var preAsync = {
+			//Function to start waiting
+			start: function() {
+				preWaiting++;
+			},
+			//Function to end waiting
+			done: function() {
+				preWaiting--;
 
-
-
-		that._callGets(request, response, asynchronous);
-		if (waiting <= 0) {
-			asynchronous.done();
+				//Check if everything is done
+				if (preWaiting <= 0) {
+					that._callGets(request, response, asynchronous);
+					if (waiting <= 0) {
+						asynchronous.done();
+					}
+				}
+			}
 		}
+		preAsync.end = preAsync.done;
+
+		that._callPre(request, response, preAsync);
+		if (preWaiting <= 0) preAsync.done();
 
 	}
 

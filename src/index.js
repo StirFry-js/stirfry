@@ -3,6 +3,7 @@
 var http = require('http');
 var fs   = require('fs');
 var defaultExtension = 'html';
+
 //Set module exports to equal the server constructor
 module.exports 		= StirFry;
 module.exports.defaultExtension = defaultExtension;
@@ -42,12 +43,12 @@ StirFry.prototype.on = function(event, options, call) {
 	//If call is undefined that means that actually options is undefined so set
 	var callToUse = call;
 	if (typeof options == 'function') {
-		callToUse = options
+		callToUse = options;
 	}
 	//If this is a dezfined event
 	if (this.listens[event]) {
 		//If its a get
-		if (event == 'get') {
+		if (event == 'get' || event == 'pre') {
 			//Push an object where the url is the options input and whether is regex or not is set automagically
 			this.listens[event].push({options: {url: options, regex: options.constructor.name == 'RegExp'}, call: callToUse});
 			return;
@@ -86,7 +87,8 @@ StirFry.prototype._callExceptions = function(err) {
 }
 //Include callgets
 #include callGets.js;
-
+//Include call pres
+#include callPre.js;
 //Just a bunch of aliases
 /**
  * Is the same as StirFry.on('request')
@@ -106,7 +108,6 @@ StirFry.prototype._callExceptions = function(err) {
 StirFry.prototype.get = function(options, call) {
 	this.on('get', options, call);
 }
-StirFry.prototype.preCount = 0;
 /**
  * A function to preprocess text before it gets served
  * @param {string} Request - Optional, the request that this preprocessor gets triggered on. If left empty this will trigger on all requests
@@ -130,10 +131,10 @@ StirFry.prototype.pre = function() {
 		options = /.*/;
 	}
 	//Push an object where the url is the options input and whether is regex or not is set automagically
-	this.listens['get'].splice(this.preCount, 0, {options: {url: options, regex: options.constructor.name == 'RegExp'}, call: callToUse});
-	this.preCount++;
+	this.on('pre', options, callToUse);
 }
 
+//Static file server
 #include static.js;
 
 //Function to combine to paths
