@@ -4,6 +4,7 @@
 var http = require('http');
 var fs   = require('fs');
 var defaultExtension = 'html';
+
 //Set module exports to equal the server constructor
 module.exports 		= StirFry;
 module.exports.defaultExtension = defaultExtension;
@@ -28,7 +29,7 @@ function StirFry(port, ip) {
 	this.ip       = ipToUse;
 	this.listens  = {
 		'get': [],
-		'post': [],
+		'pre': [],
 		'start': [],
 		'end': [],
 		'exception': []
@@ -36,6 +37,9 @@ function StirFry(port, ip) {
 	var that = this;
 	//The function to call on a request
 	this.respond = function(req, res) {
+
+
+		var sendData = '';
 		var waiting = 0;
 		var asynchronous = {
 			start: function() {
@@ -49,14 +53,12 @@ function StirFry(port, ip) {
 			}
 		}
 		asynchronous.end = asynchronous.done;
-
-		var sendData = '';
 		//Create a request object
 		var request = {
 			cookies: parseCookies(req),
 			url: req.url,
 			method: req.method,
-			httpRequest: req
+			full: req
 		}
 
 		//Function to set a cookie
@@ -72,41 +74,59 @@ function StirFry(port, ip) {
 		var response = {
 			//A function to send a file at a certain path
 			sendFile: function(path, callback) {
-				var callbackToUse = callback;
-				if (!callback) {
-					callbackToUse = (err) => console.log(JSON.stringify(err));
-				}
-				var fullPath = combinePaths(module.exports.home, path);
-				var self = this;
-				//Start an async process
-				asynchronous.start();
-				//Read the file at the path
-				fs.readFile(fullPath, function(err, data) {
-					if (err) {
-						callbackToUse(err);
-						self.send("");
-						asynchronous.end();
-						return;
-					}
-					//Send the data and end the async process after calling the callback
-					self.send(data.toString());
-					callbackToUse(false);
-					asynchronous.end();
-				})
-			},
+	var callbackToUse = callback;
+	if (!callback) {
+		callbackToUse = (err) => err ? console.log(JSON.stringify(err)):undefined;
+	}
+	var fullPath = combinePaths(module.exports.home, path);
+	var self = this;
+	//Start an async process
+	asynchronous.start();
+	//Read the file at the path
+	fs.readFile(fullPath, function(err, data) {
+		if (err) {
+			callbackToUse(err);
+			self.send("");
+			asynchronous.end();
+			return;
+		}
+		//Send the data and end the async process after calling the callback
+		self.send(data.toString());
+		callbackToUse(false);
+		asynchronous.end();
+	})
+},
+
 			//A function just to send data
 			send: function(data) {
 				sendData += data;
 			},
-			http: res
+			full: res
 		}
+		var preWaiting = 0;
+		//The asynchronous stuff for the preprocessor
+		var preAsync = {
+			//Function to start waiting
+			start: function() {
+				preWaiting++;
+			},
+			//Function to end waiting
+			done: function() {
+				preWaiting--;
 
-
-
-		that._callGets(request, response, asynchronous);
-		if (waiting <= 0) {
-			asynchronous.done();
+				//Check if everything is done
+				if (preWaiting <= 0) {
+					that._callGets(request, response, asynchronous);
+					if (waiting <= 0) {
+						asynchronous.done();
+					}
+				}
+			}
 		}
+		preAsync.end = preAsync.done;
+
+		that._callPre(request, response, preAsync);
+		if (preWaiting <= 0) preAsync.done();
 
 	}
 
@@ -150,12 +170,12 @@ StirFry.prototype.on = function(event, options, call) {
 	//If call is undefined that means that actually options is undefined so set
 	var callToUse = call;
 	if (typeof options == 'function') {
-		callToUse = options
+		callToUse = options;
 	}
 	//If this is a dezfined event
 	if (this.listens[event]) {
 		//If its a get
-		if (event == 'get') {
+		if (event == 'get' || event == 'pre') {
 			//Push an object where the url is the options input and whether is regex or not is set automagically
 			this.listens[event].push({options: {url: options, regex: options.constructor.name == 'RegExp'}, call: callToUse});
 			return;
@@ -229,6 +249,38 @@ StirFry.prototype._callGets = function(req, res, asynchronous) {
 	}
 }
 
+//Include call pres
+
+//Function to call all the pre processor requests
+StirFry.prototype._callPre = function(req, res, asynchronous) {
+	ending = false;
+	//Loop through all the pre processors
+	for (var i = 0; i < this.listens['pre'].length; i++) {
+		//If its a regex
+		if (this.listens['pre'][i].options.regex) {
+			//If the regex matches where i add ^ to the begginning and $ to the end
+			if (RegExp('^' + this.listens['pre'][i].options.url.source + "$").test(req.url)) {
+				//Call it with the request parameters as an array
+				req.params = RegExp('^' + this.listens['pre'][i].options.url.source + "$").exec(req.url).slice(1);
+				this.listens['pre'][i].call(req, res, end, asynchronous);
+				delete req.params;
+				if (ending) {
+					break;
+				}
+			}
+		}
+		//Else if it is the same
+		else if (this.listens['pre'][i].options.url == req.url) {
+
+			this.listens['pre'][i].call(req, res, end, asynchronous);
+
+			if (ending) {
+				break;
+			}
+		}
+
+	}
+}
 
 //Just a bunch of aliases
 /**
@@ -249,7 +301,6 @@ StirFry.prototype._callGets = function(req, res, asynchronous) {
 StirFry.prototype.get = function(options, call) {
 	this.on('get', options, call);
 }
-StirFry.prototype.preCount = 0;
 /**
  * A function to preprocess text before it gets served
  * @param {string} Request - Optional, the request that this preprocessor gets triggered on. If left empty this will trigger on all requests
@@ -273,10 +324,10 @@ StirFry.prototype.pre = function() {
 		options = /.*/;
 	}
 	//Push an object where the url is the options input and whether is regex or not is set automagically
-	this.listens['get'].splice(this.preCount, 0, {options: {url: options, regex: options.constructor.name == 'RegExp'}, call: callToUse});
-	this.preCount++;
+	this.on('pre', options, callToUse);
 }
 
+//Static file server
 /**
  * Generates a response function for the desired folder for serving static files.
  * @param {string} Path - Optional, the home path to serve files from
