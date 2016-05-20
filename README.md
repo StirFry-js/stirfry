@@ -39,7 +39,7 @@ server.get(function(req, res, end, async) {
 ```
 `async.start()` starts an async operation
 `async.end()` ends an async operation.
-The response ends only when there are 0 async operations running. once `server.process` operations are done it calls `server.pre` operations, and once those are done, it calls `server.get` operations, and once those are done it ends the response
+The response ends only when there are 0 async operations running. Once `server.process` operations are done it calls `server.pre` operations, and once those are done, it calls `server.get` operations, and once those are done it ends the response
 
 
 ## Contact me
