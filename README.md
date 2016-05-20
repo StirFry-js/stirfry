@@ -2,7 +2,7 @@
 ```javascript
 var StirFry = require('stirfry');
 var server  = new StirFry(8080);
-server.get(/.*?\/(.*?)\/.*/, function(request, response, end) {
+server.request(/.*?\/(.*?)\/.*/, function(request, response, end) {
     response.send(request.params[0]);
     end();
 });
@@ -18,7 +18,7 @@ var StirFry = require('stirfry');
 var server  = new StirFry(8080);
 server.pre(StirFry.static('public'));
 ```
-That example uses the built in `StirFry.static()` to create a static file server. The `'public'` means that the static files get served from the public folder, it is optional to leave that input. `server.pre()` is a way of saying do this before anything else. If there is no path input it automatically substitutes it with /.\*/
+That example uses the built in `StirFry.static()` to create a static file server. The `'public'` means that the static files get served from the public folder, it is optional to leave that input. `server.pre()` is a way of saying do this before anything else. If there is no path input it automatically substitutes it with /.\*/, it does the sae for `server.request()`
 
 ## Asynchronous operations
 Asynchronous operations in stirfry run in parallel which means that you can't expect your asynchronous operation in one layer to show up in the same layer, so that is why I provided 3 layers
@@ -27,7 +27,7 @@ An example
 var StirFry = require('stirfry');
 var fs      = require('fs');
 var server  = new StirFry(8080);
-server.get(function(req, res, end, async) {
+server.req(function(req, res, end, async) {
 	async.start();
 	fs.readFile('file', function(err, data) {
 		if (err) return console.log(err);
@@ -37,9 +37,10 @@ server.get(function(req, res, end, async) {
 	end();
 });
 ```
+`server.req` is shorthand for `server.request`
 `async.start()` starts an async operation
 `async.end()` ends an async operation.
-The response ends only when there are 0 async operations running. Once `server.process` operations are done it calls `server.pre` operations, and once those are done, it calls `server.get` operations, and once those are done it ends the response
+The response ends only when there are 0 async operations running. Once `server.process` operations are done it calls `server.pre` operations, and once those are done, it calls `server.request` operations, and once those are done it ends the response
 
 
 ## Contact me
