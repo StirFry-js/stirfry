@@ -17,7 +17,7 @@ function StirFry(port, ip) {
 	this.port     = port;
 	this.ip       = ipToUse;
 	this.listens  = {
-		'get': [],
+		'request': [],
 		'pre': [],
 		'start': [],
 		'end': [],
@@ -74,7 +74,7 @@ function StirFry(port, ip) {
 
 				//Check if everything is done
 				if (preWaiting <= 0) {
-					that._callGets(request, response, asynchronous);
+					that._callRequests(request, response, asynchronous);
 					if (waiting <= 0) {
 						asynchronous.done();
 					}
