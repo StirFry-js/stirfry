@@ -1,5 +1,4 @@
 //This code has been precompiled, please do not edit it. If you would like to make your own changes visit github
-//TODO: Split the library up into files to make it easier to work on
 //When #include filename.js works, but you need a semicolon, relative paths dont work, and it cant start with a slash, the code gets compiled into stirfry.js
 var http  = require('http');
 var fs    = require('fs');
@@ -231,7 +230,7 @@ this.process(function(req, res, end, async) {
 		var params = parsed;
 		for (var i in req.params) params[i] = req.params[i];
 		req.params = params;
-		res.send(JSON.stringify(req.params));
+		//res.send(JSON.stringify(req.params));
 	}
 });
 
