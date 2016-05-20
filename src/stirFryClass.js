@@ -21,7 +21,8 @@ function StirFry(port, ip) {
 		'pre': [],
 		'start': [],
 		'end': [],
-		'exception': []
+		'exception': [],
+		'processor': []
 	}
 	var that = this;
 	//The function to call on a request
@@ -91,10 +92,33 @@ function StirFry(port, ip) {
 		}
 		preAsync.end = preAsync.done;
 
-		that._callPre(request, response, preAsync);
-		if (preWaiting <= 0) preAsync.done();
+		var prePreWaiting = 0;
+		//The asynchronous stuff for the first layer
+		var prePreAsync = {
+			//Function to start waiting
+			start: function() {
+				prePreWaiting++;
+			},
+			//Function to end waiting
+			done: function() {
+				prePreWaiting--;
+
+				//Check if everything is done
+				if (prePreWaiting <= 0) {
+					that._callPre(request, response, preAsync);
+					if (preWaiting <= 0) {
+						preAsync.done();
+					}
+				}
+			}
+		}
+		preAsync.end = preAsync.done;
+
+		that._callProcessors(request, response, prePreAsync);
+		if (prePreWaiting <= 0) prePreAsync.done();
 
 	}
+
 
 	this.server = http.createServer(this.respond);
 	if (listen) {
