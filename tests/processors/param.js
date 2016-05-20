@@ -1,5 +1,5 @@
 var StirFry = require('../../stirfry.js');
 var server  = new StirFry(8080);
-server.get(/.*/, function (req, res) {
+server.request(function (req, res) {
 	res.send(JSON.stringify(req.params));
 })

@@ -12,4 +12,4 @@ server.pre((req, res, end, async) => {
 		async.done();
 	})
 });
-server.get(/.*/, (req, res) => res.send(res.stuff));
+server.request((req, res) => res.send(res.stuff));

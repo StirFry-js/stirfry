@@ -11,7 +11,7 @@ server.pre((req, res, end, async) => {
 		async.done();
 	})
 });
-server.get(/.*/, (req, res, end, async) => {
+server.request((req, res, end, async) => {
 	async.start();
 	fs.readFile('get', function(err, data) {
 		if (err) return console.log(err);
