@@ -1,4 +1,3 @@
-//TODO: Split the library up into files to make it easier to work on
 //When #include filename.js works, but you need a semicolon, relative paths dont work, and it cant start with a slash, the code gets compiled into stirfry.js
 var http  = require('http');
 var fs    = require('fs');
