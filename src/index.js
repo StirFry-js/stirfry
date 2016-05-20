@@ -48,7 +48,7 @@ StirFry.prototype.on = function(event, options, call) {
 	//If this is a dezfined event
 	if (this.listens[event]) {
 		//If its a get
-		if (event == 'get' || event == 'pre') {
+		if (event == 'get' || event == 'pre' || event == 'processor') {
 			//Push an object where the url is the options input and whether is regex or not is set automagically
 			this.listens[event].push({options: {url: options, regex: options.constructor.name == 'RegExp'}, call: callToUse});
 			return;
@@ -89,6 +89,10 @@ StirFry.prototype._callExceptions = function(err) {
 #include callGets.js;
 //Include call pres
 #include callPre.js;
+//Include call processors
+#include callProcess.js;
+
+
 //Just a bunch of aliases
 /**
  * Is the same as StirFry.on('request')
@@ -109,7 +113,7 @@ StirFry.prototype.get = function(options, call) {
 	this.on('get', options, call);
 }
 /**
- * A function to preprocess text before it gets served
+ * A function to preprocess requests in the middle async layer before it gets served
  * @param {string} Request - Optional, the request that this preprocessor gets triggered on. If left empty this will trigger on all requests
  * @param {callback} Preprocessor - The function that gets called to preprocess, you can change the request and response objects
  * @example
@@ -132,6 +136,31 @@ StirFry.prototype.pre = function() {
 	}
 	//Push an object where the url is the options input and whether is regex or not is set automagically
 	this.on('pre', options, callToUse);
+}
+/**
+ * A function to preprocess requests in the first async layer before it gets served
+ * @param {string} Request - Optional, the request that this preprocessor gets triggered on. If left empty this will trigger on all requests
+ * @param {callback} Preprocessor - The function that gets called to preprocess, you can change the request and response objects
+ * @example
+ *  //An example that adds a rendering engine to the response object
+ * 	server.process(function(request, response) {
+ * 		response.render = function(str, opts) {
+ * 			return ejs.render(str, opts);
+ *  	}
+ * 	})
+ *
+ *
+ *
+ * */
+StirFry.prototype.process = function() {
+	var options = arguments[0];
+	var callToUse = arguments[arguments.length - 1];
+	//If there is only 1 argument
+	if (arguments.length == 1) {
+		options = /.*/;
+	}
+	//Push an object where the url is the options input and whether is regex or not is set automagically
+	this.on('processor', options, callToUse);
 }
 
 //Static file server
