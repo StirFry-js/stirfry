@@ -31,6 +31,7 @@ StirFry.static = function(path, ending) {
 			//Read the file now
 			res.sendFile(pathToUse);
 			async.end();
+
 		});
 	}
 }
