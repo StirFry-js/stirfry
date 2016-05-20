@@ -45,18 +45,9 @@ function StirFry(port, ip) {
 		asynchronous.end = asynchronous.done;
 		//Create a request object
 		var request = {
-			cookies: parseCookies(req),
 			url: req.url,
 			method: req.method,
 			full: req
-		}
-
-		//Function to set a cookie
-		request.cookies.set	= function(name, value) {
-			//Set the cookie plus ;name=value
-			res.writeHead(200, {
-				'Set-Cookie': (req.headers.cookie) + name + '=' + value + ';'
-			});
 		}
 
 
@@ -124,4 +115,5 @@ function StirFry(port, ip) {
 	if (listen) {
 		this.listen();
 	}
+	#include processors.js;
 }

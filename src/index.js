@@ -1,7 +1,8 @@
 //TODO: Split the library up into files to make it easier to work on
 //When #include filename.js works, but you need a semicolon, relative paths dont work, and it cant start with a slash, the code gets compiled into stirfry.js
-var http = require('http');
-var fs   = require('fs');
+var http  = require('http');
+var fs    = require('fs');
+#include parsers.js;
 var defaultExtension = 'html';
 
 //Set module exports to equal the server constructor
@@ -62,20 +63,6 @@ StirFry.prototype.on = function(event, options, call) {
 	}
 }
 
-//Function to parse cookies
-/*
-Written by Corey Hart from stackoverflow
-*/
-function parseCookies (request) {
-    var list = {},
-        rc = request.headers.cookie;
-
-    rc && rc.split(';').forEach(function( cookie ) {
-        var parts = cookie.split('=');
-        list[parts.shift().trim()] = decodeURI(parts.join('='));
-    });
-    return list;
-}
 
 //Function to call all the exceptions
 StirFry.prototype._callExceptions = function(err) {

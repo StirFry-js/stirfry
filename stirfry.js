@@ -1,8 +1,47 @@
-//This code has been precompiled, please do not edit it. If you would like to make your own changes visit our github
+//This code has been precompiled, please do not edit it. If you would like to make your own changes visit github
 //TODO: Split the library up into files to make it easier to work on
 //When #include filename.js works, but you need a semicolon, relative paths dont work, and it cant start with a slash, the code gets compiled into stirfry.js
-var http = require('http');
-var fs   = require('fs');
+var http  = require('http');
+var fs    = require('fs');
+//Function to parse post data
+function parse(data) {
+	//Split the data by &
+	var split = data.split(/&/g);
+	//Now loop through and make each one of those an object with key and val
+	for (var i = 0; i < split.length; i++) {
+
+		var splitData = split[i].split('=');
+		if (splitData.length > 1)
+			split[i] = {key: splitData[0], val: splitData[1]};
+	}
+	var post = {};
+	//Now loop through and set post[split[i].key] = split[i].val
+	for (var i = 0; i < split.length; i++) {
+		post[split[i].key] = split[i].val;
+	}
+	return post;
+}
+
+//Function to parse a cookie
+function parseCookie(cookie) {
+	//Set split to be the cookie split by semicolons
+	var split = cookie.split(/; ?/g);
+	//Now loop through and make each one of those an object with key and val
+	for (var i = 0; i < split.length; i++) {
+
+		var splitData = split[i].split('=');
+		if (splitData.length > 1)
+			split[i] = {key: splitData[0], val: splitData[1]};
+	}
+	var cookies = {};
+	//Now loop through and set post[split[i].key] = split[i].val
+	for (var i = 0; i < split.length; i++) {
+		cookies[split[i].key] = split[i].val;
+	}
+	return cookies;
+
+}
+
 var defaultExtension = 'html';
 
 //Set module exports to equal the server constructor
@@ -56,18 +95,9 @@ function StirFry(port, ip) {
 		asynchronous.end = asynchronous.done;
 		//Create a request object
 		var request = {
-			cookies: parseCookies(req),
 			url: req.url,
 			method: req.method,
 			full: req
-		}
-
-		//Function to set a cookie
-		request.cookies.set	= function(name, value) {
-			//Set the cookie plus ;name=value
-			res.writeHead(200, {
-				'Set-Cookie': (req.headers.cookie) + name + '=' + value + ';'
-			});
 		}
 
 
@@ -93,6 +123,10 @@ function StirFry(port, ip) {
 		}
 		//Send the data and end the async process after calling the callback
 		self.send(data.toString());
+		//Get the file extension
+		var fileExtension = (() => {var split = path.split(/\./g); return split[split.length - 1]})();
+		if (fileExtension == 'html' || fileExtension == 'htm')
+			res.writeHead(200, { 'Content-Type': 'text/html' });
 		callbackToUse(false);
 		asynchronous.end();
 	})
@@ -158,6 +192,57 @@ function StirFry(port, ip) {
 	if (listen) {
 		this.listen();
 	}
+	this.process(function(req, res, end, async) {
+	//Retrieve post data
+	if (req.method == 'POST') {
+		async.start();
+
+		var postData = '';
+
+		req.full.on('data', function (data) {
+			postData += data;
+
+            // Too much POST data, kill the connection!
+            // 1e6 === 1 * Math.pow(10, 6) === 1 * 1000000 ~~~ 1MB
+            if (postData.length > 1e6)
+                request.connection.destroy();
+		})
+		req.full.on('end', function() {
+
+			req.post = parse(postData);
+			async.done();
+		})
+	}
+
+});
+
+this.process(function(req, res, end, async) {
+	//Split the request by ?
+	var split = req.url.split('?');
+	//res.send(split);
+	if (split[1]) {
+		//Clone req.url to req.fullUrl
+		req.fullUrl = req.url.slice(0);
+		//Now parse it
+		var parsed = parse(split[1]);
+		req.url = split[0];
+		//res.send(JSON.stringify(parsed));
+
+		var params = parsed;
+		for (var i in req.params) params[i] = req.params[i];
+		req.params = params;
+		//res.send(JSON.stringify(req.params));
+	}
+});
+
+this.process(function(req, res, end, async) {
+	if (req.full.headers.cookie)
+		req.cookies = parseCookie(req.full.headers.cookie);
+	else
+		req.cookies = {};
+});
+
+
 }
 
 
@@ -213,20 +298,6 @@ StirFry.prototype.on = function(event, options, call) {
 	}
 }
 
-//Function to parse cookies
-/*
-Written by Corey Hart from stackoverflow
-*/
-function parseCookies (request) {
-    var list = {},
-        rc = request.headers.cookie;
-
-    rc && rc.split(';').forEach(function( cookie ) {
-        var parts = cookie.split('=');
-        list[parts.shift().trim()] = decodeURI(parts.join('='));
-    });
-    return list;
-}
 
 //Function to call all the exceptions
 StirFry.prototype._callExceptions = function(err) {
