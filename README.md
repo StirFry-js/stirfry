@@ -1,5 +1,4 @@
-
-VM214:1 # Stir Fry #
+# Stir Fry #
 Stir fry is a ___fast___, ___lightweight___, and ___easy to use___ web framework.
 #### Creating your first server ##
 ```javascript
