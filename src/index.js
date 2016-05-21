@@ -16,18 +16,47 @@ module.exports.home = ((require.main || module).filename).split('/').slice(0, -1
  *
  *
  * */
-StirFry.prototype.listen = function(callback) {
+StirFry.prototype.listen = function(port, ip, callback) {
 	var call = callback || function(e) {
 		if (e) {
 			console.error(e);
 			this._callExceptions(e);
 		}
 	}
-
-	this.server.listen(this.port, this.ip, call);
+	var self = this;
+	//Get only number input
+	var portToUse = (function() {
+		var onlyNum;
+		for (var i in arguments)
+			if (typeof arguments[i] == 'number')
+				onlyNum = arguments[i];
+		return onlyNum || self.port;
+	})()
+	//Get the only string inputted
+	var ipToUse = (function() {
+		var onlyString;
+		for (var i in arguments)
+			if (typeof arguments[i] == 'string')
+				onlyString = arguments[i];
+		return onlyString || self.ip;
+	})()
+	//Get the only function input
+	var callbackToUse = (function() {
+		var onlyFunc;
+		for (var i in arguments)
+			if (typeof arguments[i] == 'function')
+				onlyFunc = arguments[i];
+		return onlyFunc || function(e) {
+			if (e) {
+				console.error(e);
+				this._callExceptions(e);
+			}
+		}
+	})()
+	this.server.listen(portToUse, ipToUse, callbackToUse);
 }
 /**
- * Listens for an event and call a function when it happens
+ * Listens for an event and call a function when it happen
  * @param {string} Event - The type of event to listen for
  * @param {object} Options - Options for listening
  * @param {callback} Callback - The function to call on the event, it will get inputs depending on what event it is
