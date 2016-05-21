@@ -12,7 +12,7 @@
  
  `request.params[0]` is the same as saying $1 in regex replace `request.params[1]` would be the same as saying $2 and so on. `response.send` appends the input to the response. `end()` stops that request from activating any other get listeners.
  
- ## Static file servers
+ ## Static file servers ##
  ```javascript
  var StirFry = require('stirfry');
  var server  = new StirFry(8080);
@@ -20,7 +20,7 @@
  ```
  That example uses the built in `StirFry.static()` to create a static file server. The `'public'` means that the static files get served from the public folder, it is optional to leave that input. `server.pre()` is a way of saying do this before anything else. If there is no path input it automatically substitutes it with /.\*/, it does the sae for `server.request()`
  
- ## Asynchronous operations
+ ## Asynchronous operations ##
  Asynchronous operations in stirfry run in parallel which means that you can't expect your asynchronous operation in one layer to show up in the same layer, so that is why I provided 3 layers
  An example
  ```javascript
@@ -42,10 +42,10 @@
  `async.end()` ends an async operation.
  The response ends only when there are 0 async operations running. Once `server.process` operations are done it calls `server.pre` operations, and once those are done, it calls `server.request` operations, and once those are done it ends the response
  
- ## Go to the github.io page for more information
+ ## Go to the github.io page for more information ##
  http://stirfryjs.github.io/stirfry
  
- ## Contact me
+ ## Contact me ##
  My email address is: squishybanana04@gmail.com
  Please email me if you have any ideas/requests/or want to contribute.
  My website is: http://squishybanana.com
