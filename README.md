@@ -42,11 +42,13 @@ server.req(function(req, res, end, async) {
 `async.end()` ends an async operation.
 The response ends only when there are 0 async operations running. Once `server.process` operations are done it calls `server.pre` operations, and once those are done, it calls `server.request` operations, and once those are done it ends the response
 
+## Go to the github.io page for more information
+http://stirfry-js.github.io/stirfry
 
 ## Contact me
 My email address is: squishybanana04@gmail.com
 Please email me if you have any ideas/requests/or want to contribute.
 My website is: http://squishy-banana.com
-
+The github.io page is: http://stirfry-js.github.io/stirfry
 
 <sup><sub>I'm twelve.</sub></sup>
