@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="UTF-8">
+    <title>Stirfry by StirFry-js</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" href="stylesheets/normalize.css" media="screen">
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="stylesheets/github-light.css" media="screen">
+  </head>
+  <body>
+    <section class="page-header">
+      <h1 class="project-name">Stirfry</h1>
+      <h2 class="project-tagline">StirFry is a self contained and lightweight web framework for nodejs</h2>
+      <a href="https://github.com/StirFry-js/stirfry" class="btn">View on GitHub</a>
+      <a href="https://github.com/StirFry-js/stirfry/zipball/master" class="btn">Download .zip</a>
+      <a href="https://github.com/StirFry-js/stirfry/tarball/master" class="btn">Download .tar.gz</a>
+    </section>
+
+    <section class="main-content">
+      <h1>
+<a id="stir-fry" class="anchor" href="#stir-fry" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Stir Fry</h1>
+
+<p>Stir fry is a <strong><em>fast</em></strong>, <strong><em>lightweight</em></strong>, and <strong><em>easy to use</em></strong> web framework.</p>
+
+<h4>
+<a id="creating-your-first-server" class="anchor" href="#creating-your-first-server" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Creating your first server</h4>
+
+<div class="highlight highlight-source-js"><pre><span class="pl-k">var</span> StirFry <span class="pl-k">=</span> <span class="pl-c1">require</span>(<span class="pl-s"><span class="pl-pds">'</span>stirfry<span class="pl-pds">'</span></span>);
+<span class="pl-k">var</span> server  <span class="pl-k">=</span> <span class="pl-k">new</span> <span class="pl-en">StirFry</span>(<span class="pl-c1">8080</span>);
+<span class="pl-smi">server</span>.<span class="pl-en">request</span>(<span class="pl-k">function</span> (<span class="pl-smi">request</span>, <span class="pl-smi">response</span>) {
+    <span class="pl-smi">response</span>.<span class="pl-c1">send</span>(<span class="pl-s"><span class="pl-pds">"</span>Hello World!<span class="pl-pds">"</span></span>);
+});</pre></div>
+
+<p>This example creates a server on port 8080 and sets to to respond with <code>Hello World!</code> on any request. When you use <code>response.send</code> it appends the input to the response.</p>
+
+<h4>
+<a id="static-file-servers" class="anchor" href="#static-file-servers" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Static File Servers</h4>
+
+<p>Stir Fry has a static file server method build in. All you need to do is this</p>
+
+<div class="highlight highlight-source-js"><pre><span class="pl-k">var</span> StirFry <span class="pl-k">=</span> <span class="pl-c1">require</span>(<span class="pl-s"><span class="pl-pds">'</span>stirfry<span class="pl-pds">'</span></span>);
+<span class="pl-k">var</span> server  <span class="pl-k">=</span> <span class="pl-k">new</span> <span class="pl-en">StirFry</span>(<span class="pl-c1">8080</span>);
+<span class="pl-smi">server</span>.<span class="pl-en">request</span>(<span class="pl-smi">StirFry</span>.<span class="pl-en">static</span>(<span class="pl-s"><span class="pl-pds">'</span>public<span class="pl-pds">'</span></span>));</pre></div>
+
+<p>Public is the folder that the files get served from</p>
+
+<h4>
+<a id="asynchronous-operations" class="anchor" href="#asynchronous-operations" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Asynchronous Operations</h4>
+
+<p>Stir Fry lets you run multiple asynchronous operations at once. You can do all the preprocessing you want in the <code>server.process</code> layer, and then once all of those are done, it runs <code>server.pre</code> listeners, and once those are done it runs <code>server.request</code> listeners.</p>
+
+<div class="highlight highlight-source-js"><pre><span class="pl-k">var</span> StirFry <span class="pl-k">=</span> <span class="pl-c1">require</span>(<span class="pl-s"><span class="pl-pds">'</span>stirfry<span class="pl-pds">'</span></span>);
+<span class="pl-k">var</span> server  <span class="pl-k">=</span> <span class="pl-k">new</span> <span class="pl-en">StirFry</span>(<span class="pl-c1">8080</span>);
+
+<span class="pl-k">var</span> fs <span class="pl-k">=</span> <span class="pl-c1">require</span>(<span class="pl-s"><span class="pl-pds">'</span>fs<span class="pl-pds">'</span></span>);
+
+<span class="pl-smi">server</span>.<span class="pl-en">pre</span>(<span class="pl-k">function</span> (<span class="pl-smi">request</span>, <span class="pl-smi">response</span>, <span class="pl-smi">end</span>, <span class="pl-k">async</span>) {
+    <span class="pl-k">async</span>.<span class="pl-c1">start</span>();
+    <span class="pl-smi">fs</span>.<span class="pl-en">readFile</span>(<span class="pl-s"><span class="pl-pds">'</span>file.txt<span class="pl-pds">'</span></span>, <span class="pl-k">function</span> (<span class="pl-smi">err</span>, <span class="pl-smi">data</span>) {
+        <span class="pl-smi">response</span>.<span class="pl-c1">data</span> <span class="pl-k">=</span> <span class="pl-smi">data</span>.<span class="pl-c1">toString</span>();
+        <span class="pl-k">async</span>.<span class="pl-en">done</span>();
+    });
+
+});
+<span class="pl-smi">server</span>.<span class="pl-en">request</span>(<span class="pl-k">function</span> (<span class="pl-smi">request</span>, <span class="pl-smi">response</span>) {
+    <span class="pl-smi">response</span>.<span class="pl-c1">send</span>(<span class="pl-smi">response</span>.<span class="pl-c1">data</span>);
+});</pre></div>
+
+<p>This program uses <code>fs.readFile</code> to add a property to the response object and then sends it to the user. There are loads of more efficient ways to do this, this is just an example of how to use async.</p>
+
+<h4>
+<a id="sending-files" class="anchor" href="#sending-files" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Sending Files</h4>
+
+<p>Stir Fry has a build in <code>response.sendFile</code> method, here is an example</p>
+
+<div class="highlight highlight-source-js"><pre><span class="pl-k">var</span> StirFry <span class="pl-k">=</span> <span class="pl-c1">require</span>(<span class="pl-s"><span class="pl-pds">'</span>stirfry<span class="pl-pds">'</span></span>);
+<span class="pl-k">var</span> server  <span class="pl-k">=</span> <span class="pl-k">new</span> <span class="pl-en">StirFry</span>(<span class="pl-c1">8080</span>);
+<span class="pl-smi">server</span>.<span class="pl-en">request</span>(<span class="pl-k">function</span> (<span class="pl-smi">request</span>, <span class="pl-smi">response</span>) {
+    <span class="pl-smi">response</span>.<span class="pl-en">sendFile</span>(<span class="pl-s"><span class="pl-pds">'</span>file.html<span class="pl-pds">'</span></span>);
+});</pre></div>
+
+<h4>
+<a id="responding-only-to-certain-requests" class="anchor" href="#responding-only-to-certain-requests" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Responding Only to Certain Requests</h4>
+
+<p>When you create a request, preprocessor, or processor listener, you have the option of limiting it to certain requests by regex matching. Here is an example</p>
+
+<div class="highlight highlight-source-js"><pre><span class="pl-k">var</span> StirFry <span class="pl-k">=</span> <span class="pl-c1">require</span>(<span class="pl-s"><span class="pl-pds">'</span>stirfry<span class="pl-pds">'</span></span>);
+<span class="pl-k">var</span> server  <span class="pl-k">=</span> <span class="pl-k">new</span> <span class="pl-en">StirFry</span>(<span class="pl-c1">8080</span>);
+<span class="pl-smi">server</span>.<span class="pl-en">request</span>(<span class="pl-sr"><span class="pl-pds">/</span><span class="pl-cce">\/</span><span class="pl-c1">.</span><span class="pl-k">*?</span><span class="pl-cce">\/</span>hi<span class="pl-pds">/</span></span>, <span class="pl-k">function</span> (<span class="pl-smi">request</span>, <span class="pl-smi">response</span>) {
+    <span class="pl-smi">response</span>.<span class="pl-c1">send</span>(<span class="pl-s"><span class="pl-pds">"</span>hi<span class="pl-pds">"</span></span>);
+});</pre></div>
+
+<p>You can access regex capture groups by accessing <code>request.params</code> as an array, <code>request.params</code> also processes query strings in the request.</p>
+
+<h4>
+<a id="post-requests" class="anchor" href="#post-requests" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Post Requests</h4>
+
+<p>You can access post data by accessing <code>request.post</code> as an associative array</p>
+
+      <footer class="site-footer">
+        <span class="site-footer-owner"><a href="https://github.com/StirFry-js/stirfry">Stirfry</a> is maintained by <a href="https://github.com/StirFry-js">StirFry-js</a>.</span>
+
+        <span class="site-footer-credits">This page was generated by <a href="https://pages.github.com">GitHub Pages</a> using the <a href="https://github.com/jasonlong/cayman-theme">Cayman theme</a> by <a href="https://twitter.com/jasonlong">Jason Long</a>.</span>
+      </footer>
+
+    </section>
+
+  
+  </body>
+</html>
