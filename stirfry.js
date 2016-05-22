@@ -123,9 +123,9 @@ function StirFry(port, ip) {
 		//Send the data and end the async process after calling the callback
 		self.send(data.toString());
 		//Get the file extension
-		var fileExtension = (() => {var split = path.split(/\./g); return split[split.length - 1]})();
-		if (fileExtension == 'html' || fileExtension == 'htm')
-			res.writeHead(200, { 'Content-Type': 'text/html' });
+		//var fileExtension = (() => {var split = path.split(/\./g); return split[split.length - 1]})();
+		//if (fileExtension == 'html' || fileExtension == 'htm')
+		res.writeHead(200, { 'Content-Type': 'text/html' });
 		callbackToUse(false);
 		asynchronous.end();
 	})

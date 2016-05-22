@@ -188,6 +188,8 @@ StirFry.prototype.process = function() {
 
 //Static file server
 #include static.js;
+//StirFry.prototype.use
+#include use.js;
 
 //Function to combine to paths
 function combinePaths(path1, path2) {
