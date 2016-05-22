@@ -563,6 +563,12 @@ StirFry.static = function(path, ending) {
 	}
 }
 
+//StirFry.prototype.use
+StirFry.prototype.use = function (obj) {
+	//Set the listener
+	this.on(obj.listener || obj.layer || obj.processor, obj.call);
+}
+
 
 //Function to combine to paths
 function combinePaths(path1, path2) {
