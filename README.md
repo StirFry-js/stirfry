@@ -1,6 +1,43 @@
 # Stir Fry #
-Stir fry is a ___fast___, ___lightweight___, and ___easy to use___ web framework for nodejs.
-#### Creating your first server ##
+Stir Fry is a ___fast___, ___lightweight___, and ___easy to use___ web framework for nodejs.
+## Table Of Contents ##
+ * #### [What is this?](#whatisthis)
+ * #### [Quick Start](#quickstart)
+ * #### [About](#about)
+
+<a name="whatisthis"></a>
+## What is this? ##
+Stir Fry is a framework for making web servers in nodejs. It enables you to quickly and easily create web apps and servers. So, here is how to create one:
+
+The first step is to create a server program that uses Stir Fry. Start by creating a folder, you can call it anything you want.
+
+Next navigate to that folder in terminal and run this command:<br>
+`npm install stirfry`<br>
+That installs Stir Fry into the folder your server is running from. Next create a file called `server.js` and open it with your favourite code editor. Add this code: <br>
+```javascript
+var StirFry = require('stirfry');
+var server  = new StirFry(8080);
+server.request(function (request, response) {
+    response.send("Hello World!");
+});
+```
+To run it, type:
+`node server.js`<br>
+If that doesn't work, try:
+`nodejs server.js`<br>
+If that doesn't work, you must install nodejs.<br>
+Assuming you've done it right, you can go to `localhost:8080` in any web browser and it should show `Hello World!`
+#### How did that work?
+Setting the server to equal a `new StirFry(8080)` meant that you were telling the server to listen for any request on port 8080. Then calling `server.request` added that as a "responder" to the "listener".
+
+After all of the listeners have been called it sends the response to the user. You can add to the response by writing 
+```javascript
+response.send("The thing you want to add to the response");
+```
+So by typing `response.send("Hello World!")` you made that the response.
+<a name="quickstart"></a>
+## Quick Start ##
+#### Creating your first server ####
 ```javascript
 var StirFry = require('stirfry');
 var server  = new StirFry(8080);
@@ -81,3 +118,7 @@ You also can put an array of plugin objects if you need multiple. Or if it makes
 
 #### Post Requests ##
 You can access post data by accessing `request.post` as an associative array
+
+## About ##
+<a name="about"></a>
+
