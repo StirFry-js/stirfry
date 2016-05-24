@@ -12,7 +12,7 @@
   <body>
     <section class="page-header">
       <h1 class="project-name">Stirfry</h1>
-      <h2 class="project-tagline">StirFry is a self contained and lightweight web framework for nodejs</h2>
+      <h2 class="project-tagline">StirFry is a fast, self contained, and lightweight web framework for nodejs</h2>
       <a href="https://github.com/StirFry-js/stirfry" class="btn">View on GitHub</a>
       <a href="https://github.com/StirFry-js/stirfry/zipball/master" class="btn">Download .zip</a>
       <a href="https://github.com/StirFry-js/stirfry/tarball/master" class="btn">Download .tar.gz</a>
@@ -93,6 +93,29 @@
 });</pre></div>
 
 <p>You can access regex capture groups by accessing <code>request.params</code> as an array, <code>request.params</code> also processes query strings in the request.</p>
+
+<h4>
+<a id="installing-plugins" class="anchor" href="#installing-plugins" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Installing plugins</h4>
+
+<p>Just write <code>server.use(thePluginObject)</code></p>
+
+<h4>
+<a id="creating-plugins" class="anchor" href="#creating-plugins" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Creating Plugins</h4>
+
+<p>To create a plugin just create an (or array of objects) that have a layer property, a call property, and a url property (optional). This is a logger very similar to the built in one.</p>
+
+<div class="highlight highlight-source-js"><pre><span class="pl-c1">module</span>.<span class="pl-smi">exports</span> <span class="pl-k">=</span> {
+    layer<span class="pl-k">:</span> <span class="pl-s"><span class="pl-pds">'</span>pre<span class="pl-pds">'</span></span>,
+    <span class="pl-en">call</span><span class="pl-k">:</span> <span class="pl-k">function</span>(<span class="pl-smi">req</span>, <span class="pl-smi">res</span>) {
+        <span class="pl-k">var</span> log <span class="pl-k">=</span> <span class="pl-s"><span class="pl-pds">`</span>request for <span class="pl-s1"><span class="pl-pse">${</span><span class="pl-smi">req</span>.<span class="pl-smi">fullUrl</span><span class="pl-pse">}</span></span> from <span class="pl-s1"><span class="pl-pse">${</span><span class="pl-smi">req</span>.<span class="pl-smi">ip</span><span class="pl-pse">}</span></span> at <span class="pl-s1"><span class="pl-pse">${</span><span class="pl-k">new</span> <span class="pl-en">Date</span>()<span class="pl-pse">}</span></span><span class="pl-pds">`</span></span>
+        <span class="pl-en">console</span>.<span class="pl-c1">log</span>(log);
+    }
+}</pre></div>
+
+<p>When you say <code>server.use(logger)</code>, in the background that does
+<code>server[logger.layer](call)</code> or if you have a url property, <code>server[logger.layer](logger.url, call)</code></p>
+
+<p>You also can put an array of plugin objects if you need multiple. Or if it makes it easier to understand the code, you can put arrays of arrays of logger objects. It runs recursively.</p>
 
 <h4>
 <a id="post-requests" class="anchor" href="#post-requests" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Post Requests</h4>
