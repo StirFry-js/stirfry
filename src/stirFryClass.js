@@ -47,8 +47,12 @@ function StirFry(port, ip) {
 		var request = {
 			url: req.url,
 			method: req.method,
-			full: req
+			full: req,
+			ip: req.connection.remoteAddress,
+			connection: req.connection,
+			headers: req.headers
 		}
+		console.log(req.connection.remoteAddress);
 
 
 		//Create a response object
