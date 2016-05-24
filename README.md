@@ -1,5 +1,7 @@
 # Stir Fry #
 Stir Fry is a ___fast___, ___lightweight___, and ___easy to use___ web framework for nodejs.
+<br>
+npm: https://www.npmjs.com/package/stirfry
 ## Table Of Contents ##
  * [What is this?](#whatisthis)
  * [Quick Start](#quickstart)
@@ -121,4 +123,5 @@ You can access post data by accessing `request.post` as an associative array
 
 ## About ##
 <a name="about"></a>
-
+StirFry and the documentation was written by Alex Waese-Perlman (I'm twelve ;))
+<br>Here's my website: http://www.squishy-banana.com
