@@ -32,7 +32,7 @@ server.pre(function (request, response, end, async) {
         response.data = data.toString();
         async.done();
     });
-    
+
 });
 server.request(function (request, response) {
     response.send(response.data);
@@ -59,6 +59,25 @@ server.request(/\/.*?\/hi/, function (request, response) {
 });
 ```
 You can access regex capture groups by accessing `request.params` as an array, `request.params` also processes query strings in the request.
+
+#### Installing plugins ####
+Just write `server.use(thePluginObject)`
+
+#### Creating Plugins ####
+To create a plugin just create an (or array of objects) that have a layer property, a call property, and a url property (optional). This is a logger very similar to the built in one.
+```javascript
+module.exports = {
+	layer: 'pre',
+	call: function(req, res) {
+		var log = `request for ${req.fullUrl} from ${req.ip} at ${new Date()}`
+		console.log(log);
+	}
+}
+```
+When you say `server.use(logger)`, in the background that does
+`server[logger.layer](call)` or if you have a url property, `server[logger.layer](logger.url, call)`
+
+You also can put an array of plugin objects if you need multiple. Or if it makes it easier to understand the code, you can put arrays of arrays of logger objects. It runs recursively.
 
 #### Post Requests ##
 You can access post data by accessing `request.post` as an associative array
