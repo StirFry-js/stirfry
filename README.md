@@ -1,9 +1,9 @@
 # Stir Fry #
 Stir Fry is a ___fast___, ___lightweight___, and ___easy to use___ web framework for nodejs.
 ## Table Of Contents ##
- * #### [What is this?](#whatisthis)
- * #### [Quick Start](#quickstart)
- * #### [About](#about)
+ * [What is this?](#whatisthis)
+ * [Quick Start](#quickstart)
+ * [About](#about)
 
 <a name="whatisthis"></a>
 ## What is this? ##
