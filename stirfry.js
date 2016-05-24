@@ -96,8 +96,12 @@ function StirFry(port, ip) {
 		var request = {
 			url: req.url,
 			method: req.method,
-			full: req
+			full: req,
+			ip: req.connection.remoteAddress,
+			connection: req.connection,
+			headers: req.headers
 		}
+		console.log(req.connection.remoteAddress);
 
 
 		//Create a response object
@@ -565,10 +569,45 @@ StirFry.static = function(path, ending) {
 
 //StirFry.prototype.use
 StirFry.prototype.use = function (obj) {
-	//Set the listener
-	this.on(obj.listener || obj.layer || obj.processor, obj.call);
+	//If the object is an array
+	if (Array.isArray(obj)) {
+		//Run this function on each of the inner ones
+		for (var i = 0; i < obj.length; i++) {
+			this.use(obj[i]);
+		}
+	}
+	else {
+		//If there is a url parameter
+		if (obj.url)
+			this[obj.layer](obj.url, obj.call);
+		else
+			this[obj.layer](obj.call);
+	}
 }
 
+
+//A logger use
+StirFry.logger = function(path) {
+
+	return {
+		layer: 'pre',
+		call: function(request, response) {
+			var log = `Request recieved with ${request.post ? `${request.post} as post and `:``} ${request.fullUrl} as the url. Recieved from ${request.ip} on `+ formatDate(new Date());
+			console.log(log);
+			if (path) {
+				fs.appendFile(path, log + '\n');
+			}
+
+		}
+	}
+}
+
+function formatDate(date) {
+	var months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+	var days   = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+	var output = `${days[date.getDay()]}, the ${date.getDate()}${date.getDate()%10 == 1 && date.getDate() != 11 ? 'st':(date.getDate()%10 == 2 && date.getDate() != 12 ? 'nd':(date.getDate()%10 == 3 && date.getDate() != 13) ? 'rd':'th')} of ${months[date.getMonth()]}, ${date.getFullYear()}`;
+	return output;
+}
 
 //Function to combine to paths
 function combinePaths(path1, path2) {
