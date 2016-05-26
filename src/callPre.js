@@ -23,10 +23,10 @@ StirFry.prototype._callPre = function(req, res, asynchronous) {
 		//Else if it is the same
 		else {
 			var keys = [];
-			var params = (pathToRegexp(this.listens['pre'][i].options.url, keys).exec(req.url) || []).slice(1);
+			var params = (pathToRegexp(this.listens['pre'][i].options.url, keys).exec(req.url));
 			console.log(keys);
-			if (params.length >= 1) {
-
+			if (params) {
+				params = params.slice(1)
 				//Loop through params and set req.params[i] to equal params[i]
 				for (var i in params) req.params[keys[i].name] = params[i];
 				this.listens['pre'][i].call(req, res, end, asynchronous, this);
