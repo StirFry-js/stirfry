@@ -5,6 +5,7 @@ function end() {
 
 //Function to call all the get request
 StirFry.prototype._callRequests = function(req, res, asynchronous) {
+	if (!req.params) req.params = {};
 	ending = false;
 	//Loop through all the gets
 	for (var i = 0; i < this.listens['request'].length; i++) {
@@ -16,7 +17,7 @@ StirFry.prototype._callRequests = function(req, res, asynchronous) {
 				var params = RegExp('^' + this.listens['request'][i].options.url.source + "$").exec(req.url).slice(1);
 				//Loop through params and set req.params[i] to equal params[i]
 				for (var i in params) req.params[i] = params[i];
-				this.listens['request'][i].call(req, res, end, asynchronous);
+				this.listens['request'][i].call(req, res, end, asynchronous, this);
 				for (var i in params) delete req.params[i];
 				if (ending) {
 					break;
@@ -24,12 +25,22 @@ StirFry.prototype._callRequests = function(req, res, asynchronous) {
 			}
 		}
 		//Else if it is the same
-		else if (this.listens['request'][i].options.url == req.url) {
+		else {
+			var keys = [];
+			var params = (pathToRegexp(this.listens['request'][i].options.url, keys).exec(req.url) || []).slice(1);
+			console.log(params, req.url);
+			console.log(keys);
+			if (params.length >= 1) {
 
-			this.listens['request'][i].call(req, res, end, asynchronous);
+				//Loop through params and set req.params[i] to equal params[i]
+				for (var i in params) req.params[keys[i].name] = params[i];
+				console.log(req.params);
+				this.listens['request'][i].call(req, res, end, asynchronous, this);
+				for (var i in params) delete req.params[keys[i].name];
 
-			if (ending) {
-				break;
+				if (ending) {
+					break;
+				}
 			}
 		}
 

@@ -1,5 +1,6 @@
 //This code has been precompiled, please do not edit it. If you would like to make your own changes visit github
 //When #include filename.js works, but you need a semicolon, relative paths dont work, and it cant start with a slash, the code gets compiled into stirfry.js
+var pathToRegexp = require('path-to-regexp');
 var http  = require('http');
 var fs    = require('fs');
 //Function to parse post data
@@ -101,7 +102,6 @@ function StirFry(port, ip) {
 			connection: req.connection,
 			headers: req.headers
 		}
-		console.log(req.connection.remoteAddress);
 
 
 		//Create a response object
@@ -238,13 +238,6 @@ this.process(function(req, res, end, async) {
 	}
 });
 
-this.process(function(req, res, end, async) {
-	if (req.full.headers.cookie)
-		req.cookies = parseCookie(req.full.headers.cookie);
-	else
-		req.cookies = {};
-});
-
 
 }
 
@@ -347,6 +340,7 @@ function end() {
 
 //Function to call all the get request
 StirFry.prototype._callRequests = function(req, res, asynchronous) {
+	if (!req.params) req.params = {};
 	ending = false;
 	//Loop through all the gets
 	for (var i = 0; i < this.listens['request'].length; i++) {
@@ -358,7 +352,7 @@ StirFry.prototype._callRequests = function(req, res, asynchronous) {
 				var params = RegExp('^' + this.listens['request'][i].options.url.source + "$").exec(req.url).slice(1);
 				//Loop through params and set req.params[i] to equal params[i]
 				for (var i in params) req.params[i] = params[i];
-				this.listens['request'][i].call(req, res, end, asynchronous);
+				this.listens['request'][i].call(req, res, end, asynchronous, this);
 				for (var i in params) delete req.params[i];
 				if (ending) {
 					break;
@@ -366,12 +360,22 @@ StirFry.prototype._callRequests = function(req, res, asynchronous) {
 			}
 		}
 		//Else if it is the same
-		else if (this.listens['request'][i].options.url == req.url) {
+		else {
+			var keys = [];
+			var params = (pathToRegexp(this.listens['request'][i].options.url, keys).exec(req.url) || []).slice(1);
+			console.log(params, req.url);
+			console.log(keys);
+			if (params.length >= 1) {
 
-			this.listens['request'][i].call(req, res, end, asynchronous);
+				//Loop through params and set req.params[i] to equal params[i]
+				for (var i in params) req.params[keys[i].name] = params[i];
+				console.log(req.params);
+				this.listens['request'][i].call(req, res, end, asynchronous, this);
+				for (var i in params) delete req.params[keys[i].name];
 
-			if (ending) {
-				break;
+				if (ending) {
+					break;
+				}
 			}
 		}
 
@@ -382,6 +386,7 @@ StirFry.prototype._callRequests = function(req, res, asynchronous) {
 
 //Function to call all the pre processor requests
 StirFry.prototype._callPre = function(req, res, asynchronous) {
+	if (!req.params) req.params = {};
 	ending = false;
 	//Loop through all the pre processors
 	for (var i = 0; i < this.listens['pre'].length; i++) {
@@ -393,7 +398,7 @@ StirFry.prototype._callPre = function(req, res, asynchronous) {
 				var params = RegExp('^' + this.listens['pre'][i].options.url.source + "$").exec(req.url).slice(1);
 				//Loop through params and set req.params[i] to equal params[i]
 				for (var i in params) req.params[i] = params[i];
-				this.listens['pre'][i].call(req, res, end, asynchronous);
+				this.listens['pre'][i].call(req, res, end, asynchronous, this);
 				for (var i in params) delete req.params[i];
 				if (ending) {
 					break;
@@ -401,12 +406,20 @@ StirFry.prototype._callPre = function(req, res, asynchronous) {
 			}
 		}
 		//Else if it is the same
-		else if (this.listens['pre'][i].options.url == req.url) {
+		else {
+			var keys = [];
+			var params = (pathToRegexp(this.listens['pre'][i].options.url, keys).exec(req.url) || []).slice(1);
+			console.log(keys);
+			if (params.length >= 1) {
 
-			this.listens['pre'][i].call(req, res, end, asynchronous);
+				//Loop through params and set req.params[i] to equal params[i]
+				for (var i in params) req.params[keys[i].name] = params[i];
+				this.listens['pre'][i].call(req, res, end, asynchronous, this);
+				for (var i in params) delete req.params[keys[i].name];
 
-			if (ending) {
-				break;
+				if (ending) {
+					break;
+				}
 			}
 		}
 
@@ -417,6 +430,7 @@ StirFry.prototype._callPre = function(req, res, asynchronous) {
 
 //Function to call all the pre processor requests
 StirFry.prototype._callProcessors = function(req, res, asynchronous) {
+	if (!req.params) req.params = {};
 	ending = false;
 	//Loop through all the pre processors
 	for (var i = 0; i < this.listens['processor'].length; i++) {
@@ -428,20 +442,28 @@ StirFry.prototype._callProcessors = function(req, res, asynchronous) {
 				var params = RegExp('^' + this.listens['processor'][i].options.url.source + "$").exec(req.url).slice(1);
 				//Loop through params and set req.params[i] to equal params[i]
 				for (var i in params) req.params[i] = params[i];
-				this.listens['processor'][i].call(req, res, end, asynchronous);
+				this.listens['processor'][i].call(req, res, end, asynchronous, this);
 				for (var i in params) delete req.params[i];
 				if (ending) {
 					break;
 				}
 			}
 		}
+
 		//Else if it is the same
-		else if (this.listens['processor'][i].options.url == req.url) {
+		else {
+			var keys = [];
+			var params = (pathToRegexp(this.listens['processor'][i].options.url, keys).exec(req.url) || []).slice(1);
+			if (params.length >= 1) {
 
-			this.listens['processor'][i].call(req, res, end, asynchronous);
+				//Loop through params and set req.params[i] to equal params[i]
+				for (var i in params) req.params[keys[i].name] = params[i];
+				this.listens['processor'][i].call(req, res, end, asynchronous, this);
+				for (var i in params) delete req.params[keys[i].name];
 
-			if (ending) {
-				break;
+				if (ending) {
+					break;
+				}
 			}
 		}
 
@@ -590,7 +612,7 @@ StirFry.prototype.use = function (obj) {
 StirFry.logger = function(path) {
 
 	return {
-		layer: 'pre',
+		layer: 'request',
 		call: function(request, response) {
 			var log = `Request recieved with ${request.post ? `${request.post} as post and `:``} ${request.fullUrl} as the url. Recieved from ${request.ip} on `+ formatDate(new Date());
 			console.log(log);

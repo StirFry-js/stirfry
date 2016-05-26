@@ -1,4 +1,5 @@
 //When #include filename.js works, but you need a semicolon, relative paths dont work, and it cant start with a slash, the code gets compiled into stirfry.js
+var pathToRegexp = require('path-to-regexp');
 var http  = require('http');
 var fs    = require('fs');
 #include parsers.js;
@@ -195,7 +196,7 @@ StirFry.prototype.process = function() {
 StirFry.logger = function(path) {
 
 	return {
-		layer: 'pre',
+		layer: 'request',
 		call: function(request, response) {
 			var log = `Request recieved with ${request.post ? `${request.post} as post and `:``} ${request.fullUrl} as the url. Recieved from ${request.ip} on `+ formatDate(new Date());
 			console.log(log);
