@@ -1,6 +1,6 @@
 {
   "name": "stirfry",
-  "version": "1.0.0",
+  "version": "1.0.4",
   "description": "Stir fry is a self contained and easy to use web framework.",
   "main": "stirfry.js",
   "repository": {
@@ -13,5 +13,9 @@
     "StirFry"
   ],
   "author": "Alex Waese-Perlman",
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "path-to-regexp": "^1.5.0"
+  },
+  "devDependencies": {}
 }
