@@ -139,7 +139,14 @@ function StirFry(port, ip) {
 			send: function(data) {
 				sendData += data;
 			},
-			full: res
+			full: res,
+			redirect: function(url) {
+				res.writeHead(302, {'Location': url});
+				res.end();
+			},
+			setHeader: res.setHeader,
+			statusCode: res.statusCode,
+			statusMessage: res.statusMessage
 		}
 		var preWaiting = 0;
 		//The asynchronous stuff for the preprocessor
