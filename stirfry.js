@@ -17,7 +17,7 @@ function parse(data) {
 	var post = {};
 	//Now loop through and set post[split[i].key] = split[i].val
 	for (var i = 0; i < split.length; i++) {
-		post[split[i].key] = split[i].val;
+		post[decodeURI(split[i].key)] = decodeURI(split[i].val);
 	}
 	return post;
 }
