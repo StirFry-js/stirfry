@@ -69,7 +69,7 @@ StirFry.prototype.listen = function(port, ip, callback) {
  * });
  * server.listen();
  * */
-StirFry.prototype.on = function(event, options, call) {
+StirFry.prototype.on = function(event, options, call, onetime) {
 	//If call is undefined that means that actually options is undefined so set
 	var callToUse = call;
 	if (typeof options == 'function') {
@@ -80,7 +80,7 @@ StirFry.prototype.on = function(event, options, call) {
 		//If its a get
 		if (event == 'request' || event == 'pre' || event == 'processor') {
 			//Push an object where the url is the options input and whether is regex or not is set automagically
-			this.listens[event].push({options: {url: options, regex: options.constructor.name == 'RegExp'}, call: callToUse});
+			this.listens[event].push({options: {url: options, regex: options.constructor.name == 'RegExp', onetime: onetime}, call: callToUse});
 			return;
 		}
 		//Push it
@@ -119,7 +119,7 @@ StirFry.prototype._callExceptions = function(err) {
  * //Create a new stir fry server
  * var server = new StirFry(8080, '0.0.0.0');
  * //On any get request reply with the url
- * server.get(RegExp('.*'), function(req, res) {
+ * server.request('/', function(req, res) {
  *     res.send(req.url);
  * });
  * //Listen for requests
@@ -127,13 +127,14 @@ StirFry.prototype._callExceptions = function(err) {
  * */
 StirFry.prototype.request = function() {
 	var options = arguments[0];
-	var callToUse = arguments[arguments.length - 1];
+	var callToUse = arguments[1];
 	//If there is only 1 argument
 	if (arguments.length == 1) {
 		options = /.*/;
+		callToUse = arguments[0];
 	}
 	//Push an object where the url is the options input and whether is regex or not is set automagically
-	this.on('request', options, callToUse);
+	this.on('request', options, callToUse, arguments[2]);
 }
 StirFry.prototype.req = StirFry.prototype.request;
 /**
@@ -153,13 +154,14 @@ StirFry.prototype.req = StirFry.prototype.request;
  * */
 StirFry.prototype.pre = function() {
 	var options = arguments[0];
-	var callToUse = arguments[arguments.length - 1];
+	var callToUse = arguments[1];
 	//If there is only 1 argument
 	if (arguments.length == 1) {
 		options = /.*/;
+		callToUse = arguments[0];
 	}
 	//Push an object where the url is the options input and whether is regex or not is set automagically
-	this.on('pre', options, callToUse);
+	this.on('pre', options, callToUse, arguments[2]);
 }
 /**
  * A function to preprocess requests in the first async layer before it gets served
@@ -178,13 +180,14 @@ StirFry.prototype.pre = function() {
  * */
 StirFry.prototype.process = function() {
 	var options = arguments[0];
-	var callToUse = arguments[arguments.length - 1];
+	var callToUse = arguments[1];
 	//If there is only 1 argument
 	if (arguments.length == 1) {
 		options = /.*/;
+		callToUse = arguments[0];
 	}
 	//Push an object where the url is the options input and whether is regex or not is set automagically
-	this.on('processor', options, callToUse);
+	this.on('processor', options, callToUse, arguments[2]);
 }
 
 //Static file server
