@@ -114,7 +114,7 @@ module.exports = {
 }
 ```
 When you say `server.use(logger)`, in the background that does:
-`server[logger.layer](call)` or if you have a url property, `server[logger.layer](logger.url, call)`
+`server[logger.layer](logger.call)` or if you have a url property, `server[logger.layer](logger.url, logger.call)`
 
 You also can put an array of plugin objects if you need multiple. Or if it makes it easier to understand the code, you can put arrays of arrays of logger objects. It runs recursively.
 
