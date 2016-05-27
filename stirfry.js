@@ -300,7 +300,7 @@ StirFry.prototype.listen = function(port, ip, callback) {
  * });
  * server.listen();
  * */
-StirFry.prototype.on = function(event, options, call) {
+StirFry.prototype.on = function(event, options, call, onetime) {
 	//If call is undefined that means that actually options is undefined so set
 	var callToUse = call;
 	if (typeof options == 'function') {
@@ -311,7 +311,7 @@ StirFry.prototype.on = function(event, options, call) {
 		//If its a get
 		if (event == 'request' || event == 'pre' || event == 'processor') {
 			//Push an object where the url is the options input and whether is regex or not is set automagically
-			this.listens[event].push({options: {url: options, regex: options.constructor.name == 'RegExp'}, call: callToUse});
+			this.listens[event].push({options: {url: options, regex: options.constructor.name == 'RegExp', onetime: onetime}, call: callToUse});
 			return;
 		}
 		//Push it
@@ -351,9 +351,12 @@ StirFry.prototype._callRequests = function(req, res, asynchronous) {
 				//Call it with the request parameters as an array
 				var params = RegExp('^' + this.listens['request'][i].options.url.source + "$").exec(req.url).slice(1);
 				//Loop through params and set req.params[i] to equal params[i]
-				for (var i in params) req.params[i] = params[i];
+				for (var k in params) req.params[k] = params[k];
 				this.listens['request'][i].call(req, res, end, asynchronous, this);
-				for (var i in params) delete req.params[i];
+				for (var k in params) delete req.params[k];
+
+				if (this.listens['request'][i].options.onetime) this.listens['request'].splice(i, 1);
+
 				if (ending) {
 					break;
 				}
@@ -368,10 +371,12 @@ StirFry.prototype._callRequests = function(req, res, asynchronous) {
 			if (params) {
  				params = params.slice(1)
 				//Loop through params and set req.params[i] to equal params[i]
-				for (var i in params) req.params[keys[i].name] = params[i];
+				for (var k in params) req.params[keys[k].name] = params[k];
 				console.log(req.params);
 				this.listens['request'][i].call(req, res, end, asynchronous, this);
-				for (var i in params) delete req.params[keys[i].name];
+				for (var k in params) delete req.params[keys[k].name];
+
+				if (this.listens['request'][i].options.onetime) this.listens['request'].splice(i, 1);
 
 				if (ending) {
 					break;
@@ -397,9 +402,12 @@ StirFry.prototype._callPre = function(req, res, asynchronous) {
 				//Call it with the request parameters as an array
 				var params = RegExp('^' + this.listens['pre'][i].options.url.source + "$").exec(req.url).slice(1);
 				//Loop through params and set req.params[i] to equal params[i]
-				for (var i in params) req.params[i] = params[i];
+				for (var k in params) req.params[k] = params[k];
 				this.listens['pre'][i].call(req, res, end, asynchronous, this);
-				for (var i in params) delete req.params[i];
+				for (var k in params) delete req.params[k];
+
+				if (this.listens['pre'][i].options.onetime) this.listens['pre'].splice(i, 1);
+
 				if (ending) {
 					break;
 				}
@@ -413,9 +421,11 @@ StirFry.prototype._callPre = function(req, res, asynchronous) {
 			if (params) {
 				params = params.slice(1)
 				//Loop through params and set req.params[i] to equal params[i]
-				for (var i in params) req.params[keys[i].name] = params[i];
+				for (var k in params) req.params[keys[k].name] = params[k];
 				this.listens['pre'][i].call(req, res, end, asynchronous, this);
-				for (var i in params) delete req.params[keys[i].name];
+				for (var k in params) delete req.params[keys[k].name];
+
+				if (this.listens['pre'][i].options.onetime) this.listens['pre'].splice(i, 1);
 
 				if (ending) {
 					break;
@@ -441,9 +451,12 @@ StirFry.prototype._callProcessors = function(req, res, asynchronous) {
 				//Call it with the request parameters as an array
 				var params = RegExp('^' + this.listens['processor'][i].options.url.source + "$").exec(req.url).slice(1);
 				//Loop through params and set req.params[i] to equal params[i]
-				for (var i in params) req.params[i] = params[i];
+				for (var k in params) req.params[k] = params[k];
 				this.listens['processor'][i].call(req, res, end, asynchronous, this);
-				for (var i in params) delete req.params[i];
+				for (var k in params) delete req.params[k];
+
+				if (this.listens['processor'][i].options.onetime) delete this.listens['processor'].splice(i, 1);
+
 				if (ending) {
 					break;
 				}
@@ -457,9 +470,11 @@ StirFry.prototype._callProcessors = function(req, res, asynchronous) {
 			if (params) {
 				params = params.slice(1);
 				//Loop through params and set req.params[i] to equal params[i]
-				for (var i in params) req.params[keys[i].name] = params[i];
+				for (var k in params) req.params[keys[k].name] = params[k];
 				this.listens['processor'][i].call(req, res, end, asynchronous, this);
-				for (var i in params) delete req.params[keys[i].name];
+				for (var k in params) delete req.params[keys[k].name];
+
+				if (this.listens['processor'][i].options.onetime) this.listens['processor'].splice(i, 1);
 
 				if (ending) {
 					break;
@@ -482,7 +497,7 @@ StirFry.prototype._callProcessors = function(req, res, asynchronous) {
  * //Create a new stir fry server
  * var server = new StirFry(8080, '0.0.0.0');
  * //On any get request reply with the url
- * server.get(RegExp('.*'), function(req, res) {
+ * server.request('/', function(req, res) {
  *     res.send(req.url);
  * });
  * //Listen for requests
@@ -490,13 +505,14 @@ StirFry.prototype._callProcessors = function(req, res, asynchronous) {
  * */
 StirFry.prototype.request = function() {
 	var options = arguments[0];
-	var callToUse = arguments[arguments.length - 1];
+	var callToUse = arguments[1];
 	//If there is only 1 argument
 	if (arguments.length == 1) {
 		options = /.*/;
+		callToUse = arguments[0];
 	}
 	//Push an object where the url is the options input and whether is regex or not is set automagically
-	this.on('request', options, callToUse);
+	this.on('request', options, callToUse, arguments[2]);
 }
 StirFry.prototype.req = StirFry.prototype.request;
 /**
@@ -516,13 +532,14 @@ StirFry.prototype.req = StirFry.prototype.request;
  * */
 StirFry.prototype.pre = function() {
 	var options = arguments[0];
-	var callToUse = arguments[arguments.length - 1];
+	var callToUse = arguments[1];
 	//If there is only 1 argument
 	if (arguments.length == 1) {
 		options = /.*/;
+		callToUse = arguments[0];
 	}
 	//Push an object where the url is the options input and whether is regex or not is set automagically
-	this.on('pre', options, callToUse);
+	this.on('pre', options, callToUse, arguments[2]);
 }
 /**
  * A function to preprocess requests in the first async layer before it gets served
@@ -541,13 +558,14 @@ StirFry.prototype.pre = function() {
  * */
 StirFry.prototype.process = function() {
 	var options = arguments[0];
-	var callToUse = arguments[arguments.length - 1];
+	var callToUse = arguments[1];
 	//If there is only 1 argument
 	if (arguments.length == 1) {
 		options = /.*/;
+		callToUse = arguments[0];
 	}
 	//Push an object where the url is the options input and whether is regex or not is set automagically
-	this.on('processor', options, callToUse);
+	this.on('processor', options, callToUse, arguments[2]);
 }
 
 //Static file server
