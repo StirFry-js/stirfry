@@ -12,9 +12,12 @@ StirFry.prototype._callPre = function(req, res, asynchronous) {
 				//Call it with the request parameters as an array
 				var params = RegExp('^' + this.listens['pre'][i].options.url.source + "$").exec(req.url).slice(1);
 				//Loop through params and set req.params[i] to equal params[i]
-				for (var i in params) req.params[i] = params[i];
+				for (var k in params) req.params[k] = params[k];
 				this.listens['pre'][i].call(req, res, end, asynchronous, this);
-				for (var i in params) delete req.params[i];
+				for (var k in params) delete req.params[k];
+
+				if (this.listens['pre'][i].options.onetime) this.listens['pre'].splice(i, 1);
+
 				if (ending) {
 					break;
 				}
@@ -28,9 +31,11 @@ StirFry.prototype._callPre = function(req, res, asynchronous) {
 			if (params) {
 				params = params.slice(1)
 				//Loop through params and set req.params[i] to equal params[i]
-				for (var i in params) req.params[keys[i].name] = params[i];
+				for (var k in params) req.params[keys[k].name] = params[k];
 				this.listens['pre'][i].call(req, res, end, asynchronous, this);
-				for (var i in params) delete req.params[keys[i].name];
+				for (var k in params) delete req.params[keys[k].name];
+
+				if (this.listens['pre'][i].options.onetime) this.listens['pre'].splice(i, 1);
 
 				if (ending) {
 					break;
