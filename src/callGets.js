@@ -31,13 +31,10 @@ StirFry.prototype._callRequests = function(req, res, asynchronous) {
 		else {
 			var keys = [];
 			var params = pathToRegexp(this.listens['request'][i].options.url, keys).exec(req.url);
-			console.log(params, req.url);
-			console.log(keys);
 			if (params) {
  				params = params.slice(1)
 				//Loop through params and set req.params[i] to equal params[i]
 				for (var k in params) req.params[keys[k].name] = params[k];
-				console.log(req.params);
 				this.listens['request'][i].call(req, res, end, asynchronous, this);
 				for (var k in params) delete req.params[keys[k].name];
 
