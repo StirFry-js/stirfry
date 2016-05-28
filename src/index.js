@@ -10,7 +10,11 @@ module.exports 		= StirFry;
 module.exports.defaultExtension = defaultExtension;
 module.exports.home = ((require.main || module).filename).split('/').slice(0, -1).join('/');
 #include stirFryClass.js;
-
+//An express style router
+StirFry.extension = function() {
+	return new StirFry(false);
+}
+StirFry.router = StirFry.extension;
 /**
  * Starts the server listening on the port and ip that were inputted during the construction
  * @param {callback} Callback - Optional, runs when the server starts

@@ -27,7 +27,6 @@ StirFry.prototype._callPre = function(req, res, asynchronous) {
 		else {
 			var keys = [];
 			var params = (pathToRegexp(this.listens['pre'][i].options.url, keys).exec(req.url));
-			console.log(keys);
 			if (params) {
 				params = params.slice(1)
 				//Loop through params and set req.params[i] to equal params[i]

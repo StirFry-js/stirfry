@@ -17,7 +17,7 @@ function parse(data) {
 	var post = {};
 	//Now loop through and set post[split[i].key] = split[i].val
 	for (var i = 0; i < split.length; i++) {
-		post[decodeURI(split[i].key)] = decodeURI(split[i].val);
+		post[decodeURIComponent(split[i].key)] = decodeURIComponent(split[i].val);
 	}
 	return post;
 }
@@ -248,7 +248,11 @@ this.process(function(req, res, end, async) {
 
 }
 
-
+//An express style router
+StirFry.extension = function() {
+	return new StirFry(false);
+}
+StirFry.router = StirFry.extension;
 /**
  * Starts the server listening on the port and ip that were inputted during the construction
  * @param {callback} Callback - Optional, runs when the server starts
@@ -373,13 +377,10 @@ StirFry.prototype._callRequests = function(req, res, asynchronous) {
 		else {
 			var keys = [];
 			var params = pathToRegexp(this.listens['request'][i].options.url, keys).exec(req.url);
-			console.log(params, req.url);
-			console.log(keys);
 			if (params) {
  				params = params.slice(1)
 				//Loop through params and set req.params[i] to equal params[i]
 				for (var k in params) req.params[keys[k].name] = params[k];
-				console.log(req.params);
 				this.listens['request'][i].call(req, res, end, asynchronous, this);
 				for (var k in params) delete req.params[keys[k].name];
 
@@ -424,7 +425,6 @@ StirFry.prototype._callPre = function(req, res, asynchronous) {
 		else {
 			var keys = [];
 			var params = (pathToRegexp(this.listens['pre'][i].options.url, keys).exec(req.url));
-			console.log(keys);
 			if (params) {
 				params = params.slice(1)
 				//Loop through params and set req.params[i] to equal params[i]
@@ -616,6 +616,15 @@ StirFry.static = function(path, ending) {
 
 //StirFry.prototype.use
 StirFry.prototype.use = function (obj) {
+	if (obj instanceof StirFry) {
+		//Add all its listeners
+		for (var i in obj.listens) {
+			for (var k in obj.listens[i]) {
+				this.listens[i][k] = obj.listens[i][k];
+			}
+		}
+		return;
+	}
 	//If the object is an array
 	if (Array.isArray(obj)) {
 		//Run this function on each of the inner ones
