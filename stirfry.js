@@ -95,7 +95,7 @@ function StirFry(port, ip) {
 		asynchronous.end = asynchronous.done;
 		//Create a request object
 		var request = {
-			url: req.url,
+			url: decodeURIComponent(req.url),
 			method: req.method,
 			full: req,
 			ip: req.connection.remoteAddress,
