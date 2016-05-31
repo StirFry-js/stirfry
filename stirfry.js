@@ -144,9 +144,27 @@ function StirFry(port, ip) {
 				res.writeHead(302, {'Location': url});
 				res.end();
 			},
-			setHeader: res.setHeader,
-			statusCode: res.statusCode,
-			statusMessage: res.statusMessage
+			setHeader: function(header, value) {
+				res.setHeader(header, value);
+			},
+			writeHead: function(code, obj) {
+				res.writeHead(code, obj);
+			},
+			write: function(val) {
+				res.write(val);
+			},
+			stop: function(data) {
+				res.end(data);
+			},
+			runFile: function(file) {
+				asynchronous.start();
+				//Read the file
+				fs.readFile(file, function(err, data) {
+					if (err) return res.end(err);
+					eval(data.toString());
+					asynchronous.done();
+				})
+			}
 		}
 		var preWaiting = 0;
 		//The asynchronous stuff for the preprocessor

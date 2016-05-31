@@ -1,5 +1,5 @@
 # Stir Fry #
-Stir Fry is a ___fast___, ___lightweight___, and ___easy to use___ web framework for nodejs.
+Stir Fry is a ___fast___, ___lightweight___, ___self contained___, and ___easy to use___ web framework for nodejs.
 <br>
 npm: https://www.npmjs.com/package/stirfry
 ## Table Of Contents ##
@@ -30,13 +30,43 @@ If that doesn't work, try:
 If that doesn't work, you must install nodejs.<br>
 Assuming you've done it right, you can go to `localhost:8080` in any web browser and it should show `Hello World!`
 #### How did that work?
-Setting the server to equal a `new StirFry(8080)` meant that you were telling the server to listen for any request on port 8080. Then calling `server.request` added that as a "responder" to the "listener".
+Setting the server to equal a `new StirFry(8080)` meant that you were telling the server to listen for any request on port 8080. Then calling `server.request` added the input as a response for requests.
 
-After all of the listeners have been called it sends the response to the user. You can add to the response by writing 
+After all of the listeners have been called it sends the response to the user. You can add to the response by writing
 ```javascript
 response.send("The thing you want to add to the response");
 ```
 So by typing `response.send("Hello World!")` you made that the response.
+#### Preprocessing the request and response objects ####
+Stir Fry gives you the ability to preprocess the request and response objects. Basically that means you can write exensions and mods for stirfry. Here is an example
+```javascript
+var StirFry = require('stirfry');
+var server  = new StirFry(8080);
+server.pre(function(request, response) {
+	//Now I can change the request and response object before the next code runs
+    request.doubleURL = request.url + request.url;
+}
+server.request(function(request, response) {
+	//Now I can access request.doubleURL, and I also can in every request listener
+    respose.send(request.doubleURL);
+});
+```
+#### Extensions ###
+You can create extensions using basically the same syntax as a normal server and use them just  by saying `server.use(extension)`, here is an example
+```javascript
+var StirFry   = require('stirfry');
+var extension = new StirFry.extension();
+//I can put more preprocessors and responders if I want
+extension.pre(function(request, response) {
+	request.doubleURL = request.url + request.url;
+});
+var server    = new StirFry(8080);
+server.use(extension);
+server.request(function(request, response) {
+	//I can use request.doubleURL
+    response.send(request.doubleURL);
+});
+```
 <a name="quickstart"></a>
 ## Quick Start ##
 #### Creating your first server ####
