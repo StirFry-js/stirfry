@@ -133,20 +133,26 @@ You can access regex capture groups by accessing `request.params` as an array. `
 Just write `server.use(thePluginObject)`
 
 #### Creating Plugins ####
-To create a plugin just create an object (or array of objects) that have a layer property, a call property, and a url property (optional). This example is a logger very similar to the built in one:
+Creating plugins works in a very similar way as creating servers. The only difference is you use `new StirFry.extension()` instead of `new StirFry()`. Then you can say `server.use(extension)` and it manages all of the listeners. Here is an example
 ```javascript
-module.exports = {
-	layer: 'pre',
-	call: function(req, res) {
-		var log = `request for ${req.fullUrl} from ${req.ip} at ${new Date()}`
-		console.log(log);
-	}
-}
+var StirFry = require('stirfry');
+var extension = new StirFry.extension();
+extension.req(function(request, response) {
+	var log = `Request recieved with ${request.post ? `${request.post} as post and `:``} ${request.fullUrl || request.url} as the url. Recieved from ${request.ip} on `+ formatDate(new Date()); //Format date is defined externally
+	console.log(log);
+});
 ```
-When you say `server.use(logger)`, in the background that does:
-`server[logger.layer](logger.call)` or if you have a url property, `server[logger.layer](logger.url, logger.call)`
-
-You also can put an array of plugin objects if you need multiple. Or if it makes it easier to understand the code, you can put arrays of arrays of logger objects. It runs recursively.
+That is similar to the built in logger extension. Here is how you can use it
+```javascript
+var server = new StirFry(8080);
+server.use(extension);
+```
+The built in logger is a function that returns an extension because I wanted people to be able to define a log file
+```javascript
+var StirFry = require('stirfry');
+var server = new StirFry(8080);
+server.use(StirFry.logger("logFile"));
+```
 
 #### Post Requests ##
 You can access post data by accessing `request.post` as an associative array
