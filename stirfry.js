@@ -634,7 +634,7 @@ StirFry.static = function(path, ending) {
 
 //StirFry.prototype.use
 StirFry.prototype.use = function (obj) {
-	if (obj instanceof StirFry) {
+	if (obj.listens) {
 		//Add all its listeners
 		for (var i in obj.listens) {
 			for (var k in obj.listens[i]) {
@@ -643,43 +643,26 @@ StirFry.prototype.use = function (obj) {
 		}
 		return;
 	}
-	//If the object is an array
-	if (Array.isArray(obj)) {
-		//Run this function on each of the inner ones
-		for (var i = 0; i < obj.length; i++) {
-			this.use(obj[i]);
-		}
-	}
-	else {
-		//If there is a url parameter
-		if (obj.url)
-			this[obj.layer](obj.url, obj.call);
-		else
-			this[obj.layer](obj.call);
-	}
 }
 
 
 //A logger use
 StirFry.logger = function(path) {
-
-	return {
-		layer: 'request',
-		call: function(request, response) {
-			var log = `Request recieved with ${request.post ? `${request.post} as post and `:``} ${request.fullUrl} as the url. Recieved from ${request.ip} on `+ formatDate(new Date());
-			console.log(log);
-			if (path) {
-				fs.appendFile(path, log + '\n');
-			}
-
+	var extension = new StirFry.extension;
+	extension.req(function(request, response) {
+		var log = `Request recieved with ${request.post ? `${request.post} as post and `:``} ${request.fullUrl || request.url} as the url. Recieved from ${request.ip} on `+ formatDate(new Date());
+		console.log(log);
+		if (path) {
+			fs.appendFile(path, log + '\n');
 		}
-	}
+	});
+	return extension;
 }
 
 function formatDate(date) {
 	var months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 	var days   = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-	var output = `${days[date.getDay()]}, the ${date.getDate()}${date.getDate()%10 == 1 && date.getDate() != 11 ? 'st':(date.getDate()%10 == 2 && date.getDate() != 12 ? 'nd':(date.getDate()%10 == 3 && date.getDate() != 13) ? 'rd':'th')} of ${months[date.getMonth()]}, ${date.getFullYear()}`;
+	var output = `${days[date.getDay()]}, the ${date.getDate()}${date.getDate()%10 == 1 && date.getDate() != 11 ? 'st':(date.getDate()%10 == 2 && date.getDate() != 12 ? 'nd':(date.getDate()%10 == 3 && date.getDate() != 13) ? 'rd':'th')} of ${months[date.getMonth()]}, ${date.getFullYear()} at ${date.getHours()}:${date.getMinutes().toString().length == 1 ? '0' + date.getMinutes.toString():date.getMinutes()}`;
 	return output;
 }
 
