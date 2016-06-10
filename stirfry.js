@@ -1,3 +1,7 @@
+<<<<<<< HEAD
+=======
+//When #include filename.js works, but you need a semicolon, relative paths dont work, and it cant start with a slash, the code gets compiled into stirfry.js
+>>>>>>> d8a9d5a7425d2e7c83ef52b53dca5a3cb0fe9521
 var pathToRegexp = require('path-to-regexp');
 var http = require('http');
 var fs = require('fs');
