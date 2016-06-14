@@ -1,7 +1,3 @@
-<<<<<<< HEAD
-=======
-//When #include filename.js works, but you need a semicolon, relative paths dont work, and it cant start with a slash, the code gets compiled into stirfry.js
->>>>>>> d8a9d5a7425d2e7c83ef52b53dca5a3cb0fe9521
 var pathToRegexp = require('path-to-regexp');
 var http = require('http');
 var fs = require('fs');
@@ -63,33 +59,7 @@ function StirFry(port, ip) {
     //The function to call on a request
     this.respond = function(req, res) {
 
-
-        var sendData = '';
-        var waiting = 0;
-        var asynchronous = {
-            start: function() {
-                waiting++;
-            },
-            done: function() {
-                waiting--;
-                if (waiting <= 0) {
-                    res.end(sendData);
-                }
-            }
-        }
-        asynchronous.end = asynchronous.done;
-        //Create a request object
-        var request = {
-            url: decodeURIComponent(req.url),
-            method: req.method,
-            full: req,
-            ip: req.connection.remoteAddress,
-            connection: req.connection,
-            headers: req.headers
-        }
-
-
-        //Create a response object
+		//Create a response object
         var response = {
             //A function to send a file at a certain path
             sendFile: function(path, callback) {
@@ -124,7 +94,7 @@ function StirFry(port, ip) {
 
             //A function just to send data
             send: function(data) {
-                sendData += data;
+                this.response += data;
             },
             full: res,
             redirect: function(url) {
@@ -145,6 +115,9 @@ function StirFry(port, ip) {
             stop: function(data) {
                 res.end(data);
             },
+			end: function(data) {
+				res.end(data);
+			},
             runFile: function(file) {
                 asynchronous.start();
                 //Read the file
@@ -154,7 +127,33 @@ function StirFry(port, ip) {
                     asynchronous.done();
                 })
             }
+		}
+		response.response = '';
+        var waiting = 0;
+        var asynchronous = {
+            start: function() {
+                waiting++;
+            },
+            done: function() {
+                waiting--;
+                if (waiting <= 0) {
+                    res.end(response.response);
+                }
+            }
         }
+        asynchronous.end = asynchronous.done;
+        //Create a request object
+        var request = {
+            url: decodeURIComponent(req.url),
+            method: req.method,
+            full: req,
+            ip: req.connection.remoteAddress,
+            connection: req.connection,
+            headers: req.headers
+        }
+
+
+
         var preWaiting = 0;
         //The asynchronous stuff for the preprocessor
         var preAsync = {
@@ -267,57 +266,57 @@ StirFry.router = StirFry.extension;
  *
  * */
 StirFry.prototype.listen = function(port, ip, callback) {
-        var call = callback || function(e) {
+    var call = callback || function(e) {
+        if (e) {
+            console.error(e);
+            this._callExceptions(e);
+        }
+    }
+    var self = this;
+    //Get only number input
+    var portToUse = (function() {
+            var onlyNum;
+            for (var i in arguments)
+                if (typeof arguments[i] == 'number')
+                    onlyNum = arguments[i];
+            return onlyNum || self.port;
+        })()
+        //Get the only string inputted
+    var ipToUse = (function() {
+            var onlyString;
+            for (var i in arguments)
+                if (typeof arguments[i] == 'string')
+                    onlyString = arguments[i];
+            return onlyString || self.ip;
+        })()
+        //Get the only function input
+    var callbackToUse = (function() {
+        var onlyFunc;
+        for (var i in arguments)
+            if (typeof arguments[i] == 'function')
+                onlyFunc = arguments[i];
+        return onlyFunc || function(e) {
             if (e) {
                 console.error(e);
                 this._callExceptions(e);
             }
         }
-        var self = this;
-        //Get only number input
-        var portToUse = (function() {
-                var onlyNum;
-                for (var i in arguments)
-                    if (typeof arguments[i] == 'number')
-                        onlyNum = arguments[i];
-                return onlyNum || self.port;
-            })()
-            //Get the only string inputted
-        var ipToUse = (function() {
-                var onlyString;
-                for (var i in arguments)
-                    if (typeof arguments[i] == 'string')
-                        onlyString = arguments[i];
-                return onlyString || self.ip;
-            })()
-            //Get the only function input
-        var callbackToUse = (function() {
-            var onlyFunc;
-            for (var i in arguments)
-                if (typeof arguments[i] == 'function')
-                    onlyFunc = arguments[i];
-            return onlyFunc || function(e) {
-                if (e) {
-                    console.error(e);
-                    this._callExceptions(e);
-                }
-            }
-        })()
-        this.server.listen(portToUse, ipToUse, callbackToUse);
-    }
-    /**
-     * Listens for an event and call a function when it happen
-     * @param {string} Event - The type of event to listen for
-     * @param {object} Options - Options for listening
-     * @param {callback} Callback - The function to call on the event, it will get inputs depending on what event it is
-     * @example
-     * var StirFry = require('stirfry');
-     * var server = new StirFry(8080, '127.0.0.1');
-     * server.on('get', {url: '/abc.*', regex: true}, function(req, res) {
-     *     res.send(req.url);
-     * });
-     * server.listen();
-     * */
+    })()
+    this.server.listen(portToUse, ipToUse, callbackToUse);
+}
+/**
+ * Listens for an event and call a function when it happen
+ * @param {string} Event - The type of event to listen for
+ * @param {object} Options - Options for listening
+ * @param {callback} Callback - The function to call on the event, it will get inputs depending on what event it is
+ * @example
+ * var StirFry = require('stirfry');
+ * var server = new StirFry(8080, '127.0.0.1');
+ * server.on('get', {url: '/abc.*', regex: true}, function(req, res) {
+ *     res.send(req.url);
+ * });
+ * server.listen();
+ * */
 StirFry.prototype.on = function(event, options, call, onetime) {
     //If call is undefined that means that actually options is undefined so set
     var callToUse = call;
@@ -511,6 +510,43 @@ StirFry.prototype.process = function() {
     this.on('processor', options, callToUse, arguments[2]);
 }
 
+/**
+ * A shorthand function to create listeners quickly
+ * @param {string} Response - The response for that request
+ * @param {string or RegExp} Request - The url of request that it responds too
+ * @example
+ * //This sends the url of the request, when you say ${anything} it tries to find that in the request or response object, and if it cant it just sends ${url}.
+ * server.send("${url}")
+ * */
+StirFry.prototype.send = function(response, request) {
+	request = request || /.*/;
+	this.req(request, function(req, res) {
+		var send = response;
+		for (var i in req) {
+			send = send.replace("${" + i + "}", req[i]);
+		}
+		for (var i in res) {
+			send = send.replace("${" + i + "}", res[i]);
+		}
+		res.send(send);
+	})
+}
+
+/**
+ * A shorthand function to create listeners that send files quickly
+ * @param {string} File name - The file name to se d
+ * @param {string or RegExp} Request - The url of request that it responds too
+ * @example
+ * //This sends the url of the request, when you say ${anything} it tries to find that in the request or response object, and if it cant it just sends ${url}.
+ * server.send("${url}")
+ * */
+StirFry.prototype.sendFile = function(filename, request) {
+	request = request || /.*/;
+	this.req(request, function(req, res) {
+		res.sendFile(filename);
+	})
+}
+
 //Static file server
 /**
  * Generates a response function for the desired folder for serving static files.
@@ -569,7 +605,7 @@ StirFry.prototype.use = function(obj) {
 StirFry.logger = function(path) {
     var extension = new StirFry.extension;
     extension.req(function(request, response) {
-        var log = `Request recieved with ${request.post ? `${request.post} as post and `:``} ${request.fullUrl || request.url} as the url. Recieved from ${request.ip} on `+ formatDate(new Date());
+        var log = `Request recieved with ${request.post ? `${JSON.stringify(request.post)} as post and `:``} ${request.fullUrl || request.url} as the url. Recieved from ${request.ip} on `+ formatDate(new Date());
 		console.log(log);
 		if (path) {
 			fs.appendFile(path, log + '\n');
