@@ -59,7 +59,37 @@ function StirFry(port, ip) {
     //The function to call on a request
     this.respond = function(req, res) {
 
+<<<<<<< HEAD
 		//Create a response object
+=======
+
+        var sendData = '';
+        var waiting = 0;
+        var asynchronous = {
+            start: function() {
+                waiting++;
+            },
+            done: function() {
+                waiting--;
+                if (waiting <= 0) {
+                    res.end(sendData);
+                }
+            }
+        }
+        asynchronous.end = asynchronous.done;
+        //Create a request object
+        var request = {
+            url: decodeURIComponent(req.url),
+            method: req.method,
+            full: req,
+            ip: req.connection.remoteAddress,
+            connection: req.connection,
+            headers: req.headers
+        }
+
+
+        //Create a response object
+>>>>>>> origin/master
         var response = {
             //A function to send a file at a certain path
             sendFile: function(path, callback) {
@@ -82,11 +112,28 @@ function StirFry(port, ip) {
                     //Send the data and end the async process after calling the callback
                     self.send(data.toString());
                     //Get the file extension
+<<<<<<< HEAD
                     //var fileExtension = (() => {var split = path.split(/\./g); return split[split.length - 1]})();
                     //if (fileExtension == 'html' || fileExtension == 'htm')
                     res.writeHead(200, {
                         'Content-Type': 'text/html'
                     });
+=======
+                    var fileExtension = (function() {
+                    	var split = path.split(/\./g);
+                    	return split[split.length - 1];
+                    })();
+                    switch (fileExtension) {
+                    	case 'pdf':
+                    		res.setHeader('Content-Type', 'application/pdf');
+                    		break;
+                    	case 'png':
+                    		res.setHeader('Content-Type', 'image.png');
+                    	default:
+                    		res.setHeader('Content-Type', 'text/html');
+                    		break;
+                    }
+>>>>>>> origin/master
                     callbackToUse(false);
                     asynchronous.end();
                 })
@@ -94,7 +141,11 @@ function StirFry(port, ip) {
 
             //A function just to send data
             send: function(data) {
+<<<<<<< HEAD
                 this.response += data;
+=======
+                sendData += data;
+>>>>>>> origin/master
             },
             full: res,
             redirect: function(url) {
@@ -115,9 +166,12 @@ function StirFry(port, ip) {
             stop: function(data) {
                 res.end(data);
             },
+<<<<<<< HEAD
 			end: function(data) {
 				res.end(data);
 			},
+=======
+>>>>>>> origin/master
             runFile: function(file) {
                 asynchronous.start();
                 //Read the file
@@ -127,6 +181,7 @@ function StirFry(port, ip) {
                     asynchronous.done();
                 })
             }
+<<<<<<< HEAD
 		}
 		response.response = '';
         var waiting = 0;
@@ -154,6 +209,9 @@ function StirFry(port, ip) {
 
 
 
+=======
+        }
+>>>>>>> origin/master
         var preWaiting = 0;
         //The asynchronous stuff for the preprocessor
         var preAsync = {
@@ -508,6 +566,7 @@ StirFry.prototype.process = function() {
     }
     //Push an object where the url is the options input and whether is regex or not is set automagically
     this.on('processor', options, callToUse, arguments[2]);
+<<<<<<< HEAD
 }
 
 /**
@@ -545,6 +604,8 @@ StirFry.prototype.sendFile = function(filename, request) {
 	this.req(request, function(req, res) {
 		res.sendFile(filename);
 	})
+=======
+>>>>>>> origin/master
 }
 
 //Static file server
@@ -605,7 +666,11 @@ StirFry.prototype.use = function(obj) {
 StirFry.logger = function(path) {
     var extension = new StirFry.extension;
     extension.req(function(request, response) {
+<<<<<<< HEAD
         var log = `Request recieved with ${request.post ? `${JSON.stringify(request.post)} as post and `:``} ${request.fullUrl || request.url} as the url. Recieved from ${request.ip} on `+ formatDate(new Date());
+=======
+        var log = `Request recieved with ${request.post ? `${request.post} as post and `:``} ${request.fullUrl || request.url} as the url. Recieved from ${request.ip} on `+ formatDate(new Date());
+>>>>>>> origin/master
 		console.log(log);
 		if (path) {
 			fs.appendFile(path, log + '\n');
