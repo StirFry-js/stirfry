@@ -1,6 +1,7 @@
 var pathToRegexp = require('path-to-regexp');
 var http = require('http');
 var fs = require('fs');
+///var types = JSON.parse(fs.readFileSync(module.exports.home + 'types.json', 'utf8'));
 //Function to parse post data
 function parse(data) {
     //Split the data by &
@@ -29,6 +30,7 @@ var defaultExtension = 'html';
 module.exports = StirFry;
 module.exports.defaultExtension = defaultExtension;
 module.exports.home = ((require.main || module).filename).split('/').slice(0, -1).join('/');
+var types = JSON.parse(fs.readFileSync(__dirname + '/types.json', 'utf8'));
 /**
  * Creates a new Stir Fry server
  * @class
@@ -109,23 +111,15 @@ function StirFry(port, ip) {
                     //Get the file extension
                     //var fileExtension = (() => {var split = path.split(/\./g); return split[split.length - 1]})();
                     //if (fileExtension == 'html' || fileExtension == 'htm')
-                    res.writeHead(200, {
-                        'Content-Type': 'text/html'
-                    });
+                    //res.writeHead(200, {
+                    //    'Content-Type': 'text/html'
+                    //});
                     var fileExtension = (function() {
                     	var split = path.split(/\./g);
                     	return split[split.length - 1];
                     })();
-                    switch (fileExtension) {
-                    	case 'pdf':
-                    		res.setHeader('Content-Type', 'application/pdf');
-                    		break;
-                    	case 'png':
-                    		res.setHeader('Content-Type', 'image.png');
-                    	default:
-                    		res.setHeader('Content-Type', 'text/html');
-                    		break;
-                    }
+
+                    res.writeHead(200, {'Content-Type': types[fileExtension]});
                     callbackToUse(false);
                     asynchronous.end();
                 })
@@ -194,7 +188,6 @@ function StirFry(port, ip) {
 
 
 
-        }
         var preWaiting = 0;
         //The asynchronous stuff for the preprocessor
         var preAsync = {
@@ -291,9 +284,10 @@ function StirFry(port, ip) {
             //res.send(JSON.stringify(req.params));
         }
     });
-
-
 }
+
+
+
 
 //An express style router
 StirFry.extension = function() {
