@@ -1,6 +1,6 @@
 {
   "name": "stirfry",
-  "version": "1.4.9",
+  "version": "1.5.1",
   "description": "Stir fry is a self contained and easy to use web framework.",
   "main": "stirfry.js",
   "repository": {
