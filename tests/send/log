@@ -28,3 +28,5 @@ Request recieved with  /socket.io/?EIO=3&transport=polling&t=LLEBeww as the url.
 Request recieved with {"undefined":"undefined"} as post and  /socket.io/?EIO=3&transport=polling&t=LLEBex5 as the url. Recieved from 127.0.0.1 on Tuesday, the 14th of June, 2016 at 12:12
 Request recieved with  /socket.io/?EIO=3&transport=polling&t=LLEBgOg as the url. Recieved from 127.0.0.1 on Tuesday, the 14th of June, 2016 at 12:12
 Request recieved with {"undefined":"undefined"} as post and  /socket.io/?EIO=3&transport=polling&t=LLEBgOq as the url. Recieved from 127.0.0.1 on Tuesday, the 14th of June, 2016 at 12:12
+Request recieved with  / as the url. Recieved from 127.0.0.1 on Tuesday, the 6th of December, 2016 at 12:0function getMinutes() { [native code] }
+Request recieved with  /favicon.ico as the url. Recieved from 127.0.0.1 on Tuesday, the 6th of December, 2016 at 12:0function getMinutes() { [native code] }

@@ -61,7 +61,7 @@ function StirFry(port, ip) {
     //The function to call on a request
     this.respond = function(req, res) {
 		//Create a response object
-        var sendData = '';
+        var sendData = new Buffer('');
         var waiting = 0;
         var asynchronous = {
             start: function() {
@@ -107,7 +107,7 @@ function StirFry(port, ip) {
                         return;
                     }
                     //Send the data and end the async process after calling the callback
-                    self.send(data.toString());
+                    self.send(data);
                     //Get the file extension
                     //var fileExtension = (() => {var split = path.split(/\./g); return split[split.length - 1]})();
                     //if (fileExtension == 'html' || fileExtension == 'htm')
@@ -127,8 +127,9 @@ function StirFry(port, ip) {
 
             //A function just to send data
             send: function(data) {
-                this.response += data;
-                sendData += data;
+                this.response = Buffer.concat([Buffer(this.response), Buffer(data)]);
+                sendData = Buffer.concat([Buffer(sendData), Buffer(data)]);
+//		console.log(sendData);
             },
             full: res,
             redirect: function(url) {
@@ -149,9 +150,9 @@ function StirFry(port, ip) {
             stop: function(data) {
                 res.end(data);
             },
-			end: function(data) {
-				res.end(data);
-			},
+            end: function(data) {
+		res.end(data);
+	    },
             runFile: function(file) {
                 asynchronous.start();
                 //Read the file
@@ -161,8 +162,8 @@ function StirFry(port, ip) {
                     asynchronous.done();
                 })
             }
-		}
-		response.response = '';
+	}
+	response.response = new Buffer('');
         var waiting = 0;
         var asynchronous = {
             start: function() {
@@ -172,6 +173,7 @@ function StirFry(port, ip) {
                 waiting--;
                 if (waiting <= 0) {
                     res.end(response.response);
+		    //console.log(sendData);
                 }
             }
         }

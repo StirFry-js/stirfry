@@ -32,3 +32,5 @@ Request recieved with  undefined as the url. Recieved from 127.0.0.1 on Thursday
 Request recieved with  undefined as the url. Recieved from 127.0.0.1 on Thursday, the 9th of June, 2016 at 12:18
 Request recieved with  /asdf as the url. Recieved from 127.0.0.1 on Thursday, the 9th of June, 2016 at 12:18
 Request recieved with  /favicon.ico as the url. Recieved from 127.0.0.1 on Thursday, the 9th of June, 2016 at 12:18
+Request recieved with  /indextest as the url. Recieved from 127.0.0.1 on Tuesday, the 6th of December, 2016 at 12:0function getMinutes() { [native code] }
+Request recieved with  /favicon.ico as the url. Recieved from 127.0.0.1 on Tuesday, the 6th of December, 2016 at 12:0function getMinutes() { [native code] }

@@ -1,3 +1,5 @@
 var StirFry = require('../../../stirfry');
 var server = new StirFry(8080);
-server.sendFile('./image.png');
+server.req(function(req,res) {
+	res.sendFile('image.png');
+});
