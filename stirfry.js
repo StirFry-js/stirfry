@@ -2,7 +2,10 @@
 let pathToRegexp = require('path-to-regexp');
 let http = require('http');
 let fs = require('fs');
-let parse = require('./utils/parse')
+
+let parse = require('./utils/parse');
+let combinePaths = require('./utils/combinePaths');
+let formatDate = require('./utils/formatdate');
 
 let defaultExtension = 'html';
 
@@ -10,7 +13,7 @@ let defaultExtension = 'html';
 module.exports = StirFry;
 module.exports.defaultExtension = defaultExtension;
 module.exports.home = ((require.main || module).filename).split('/').slice(0, -1).join('/');
-let types = JSON.parse(fs.readFileSync(__dirname + '/types.json', 'utf8'));
+let types = require(__dirname + '/types');
 /**
  * Creates a new Stir Fry server
  * @class
@@ -37,6 +40,11 @@ function StirFry(port, ip) {
         'exception': [],
         'processor': []
     }
+    this.layers = {
+        'request': true,
+        'pre': true,
+        'processor': true
+    };
     let that = this;
     //The function to call on a request
     this.respond = function(req, res) {
@@ -342,10 +350,10 @@ StirFry.prototype.on = function(event, options, call, onetime) {
     if (typeof options == 'function') {
         callToUse = options;
     }
-    //If this is a dezfined event
+    //If this is a defined event
     if (this.listens[event]) {
         //If its a get
-        if (event == 'request' || event == 'pre' || event == 'processor') {
+        if (this.layers[event]) {
             //Push an object where the url is the options input and whether is regex or not is set automagically
             this.listens[event].push({
                 options: {
@@ -429,6 +437,24 @@ StirFry.prototype._callLayer = function(layer, req, res, asynchronous) {
     }
 }
 
+StirFry.prototype.createLayer = function(name) {
+    if (this.listens[name]) {
+        throw new Error("There is already a listener defined as " + name);
+        return false;
+    }
+    this.listens[name] = [];
+    this.layers[name] = true;
+}
+
+StirFry.prototype.destroyLayer = function(layer) {
+    if (!this.layers[layer]) {
+        throw new Error("There is no layer of the name " + layer);
+        return false;
+    }
+    delete this.listens[name];
+    this.layers[name] = false;
+}
+
 //Function to call all the get request
 StirFry.prototype._callRequests = function(req, res, asynchronous) {
     this._callLayer('request', req, res, asynchronous);
@@ -439,7 +465,6 @@ StirFry.prototype._callPre = function(req, res, asynchronous) {
     this._callLayer('pre', req, res, asynchronous);
 
 }
-
 
 //Function to call all the pre processor requests
 StirFry.prototype._callProcessors = function(req, res, asynchronous) {
@@ -622,7 +647,7 @@ StirFry.prototype.use = function(obj) {
 
 //A logger use
 StirFry.logger = function(path) {
-    let extension = new StirFry.extension;
+    let extension = new StirFry.extension();
     extension.req(function(request, response) {
         let log = `Request recieved with ${request.post ? `${JSON.stringify(request.post)} as post and `:``} ${request.fullUrl || request.url} as the url. Recieved from ${request.ip} on ` + formatDate(new Date());
         console.log(log);
@@ -633,16 +658,3 @@ StirFry.logger = function(path) {
     return extension;
 }
 
-function formatDate(date) {
-    let months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
-    let days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-    let output = `${days[date.getDay()]}, the ${date.getDate()}${date.getDate()%10 == 1 && date.getDate() != 11 ? 'st':(date.getDate()%10 == 2 && date.getDate() != 12 ? 'nd':(date.getDate()%10 == 3 && date.getDate() != 13) ? 'rd':'th')} of ${months[date.getMonth()]}, ${date.getFullYear()} at ${date.getHours()}:${date.getMinutes().toString().length == 1 ? '0' + date.getMinutes.toString():date.getMinutes()}`;
-    return output;
-}
-
-//Function to combine to paths
-function combinePaths(path1, path2) {
-    let path1ToUse = path1.slice(-1) == '/' ? path1 : (path1 + '/');
-    let path2ToUse = path2.slice(0, 1) == '/' ? path2.slice(1) : path2;
-    return path1ToUse + path2ToUse;
-}
