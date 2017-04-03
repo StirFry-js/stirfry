@@ -1,36 +1,16 @@
-var pathToRegexp = require('path-to-regexp');
-var http = require('http');
-var fs = require('fs');
-///var types = JSON.parse(fs.readFileSync(module.exports.home + 'types.json', 'utf8'));
-//Function to parse post data
-function parse(data) {
-    //Split the data by &
-    var split = data.split(/&/g);
-    //Now loop through and make each one of those an object with key and val
-    for (var i = 0; i < split.length; i++) {
+"use strict";
+let pathToRegexp = require('path-to-regexp');
+let http = require('http');
+let fs = require('fs');
+let parse = require('./utils/parse')
 
-        var splitData = split[i].split('=');
-        if (splitData.length > 1)
-            split[i] = {
-                key: splitData[0],
-                val: splitData[1]
-            };
-    }
-    var post = {};
-    //Now loop through and set post[split[i].key] = split[i].val
-    for (var i = 0; i < split.length; i++) {
-        post[decodeURIComponent(split[i].key)] = decodeURIComponent(split[i].val);
-    }
-    return post;
-}
-
-var defaultExtension = 'html';
+let defaultExtension = 'html';
 
 //Set module exports to equal the server constructor
 module.exports = StirFry;
 module.exports.defaultExtension = defaultExtension;
 module.exports.home = ((require.main || module).filename).split('/').slice(0, -1).join('/');
-var types = JSON.parse(fs.readFileSync(__dirname + '/types.json', 'utf8'));
+let types = JSON.parse(fs.readFileSync(__dirname + '/types.json', 'utf8'));
 /**
  * Creates a new Stir Fry server
  * @class
@@ -42,8 +22,8 @@ var types = JSON.parse(fs.readFileSync(__dirname + '/types.json', 'utf8'));
  * */
 function StirFry(port, ip) {
     //If ip is not a string than it is the callback so just use '127.0.0.1' as the ip
-    var ipToUse = typeof ip == 'string' ? ip : '127.0.0.1';
-    var listen = true;
+    let ipToUse = typeof ip == 'string' ? ip : '127.0.0.1';
+    let listen = true;
     //If port is a boolean
     if (typeof port == 'boolean') listen = port;
     //Initialize all of the properties
@@ -57,13 +37,13 @@ function StirFry(port, ip) {
         'exception': [],
         'processor': []
     }
-    var that = this;
+    let that = this;
     //The function to call on a request
     this.respond = function(req, res) {
-		//Create a response object
-        var sendData = new Buffer('');
-        var waiting = 0;
-        var asynchronous = {
+        //Create a response object
+        let sendData = new Buffer('');
+        let waiting = 0;
+        let asynchronous = {
             start: function() {
                 waiting++;
             },
@@ -76,7 +56,7 @@ function StirFry(port, ip) {
         }
         asynchronous.end = asynchronous.done;
         //Create a request object
-        var request = {
+        let request = {
             url: decodeURIComponent(req.url),
             method: req.method,
             full: req,
@@ -87,15 +67,15 @@ function StirFry(port, ip) {
 
 
         //Create a response object
-        var response = {
+        let response = {
             //A function to send a file at a certain path
             sendFile: function(path, callback) {
-                var callbackToUse = callback;
+                let callbackToUse = callback;
                 if (!callback) {
                     callbackToUse = (err) => err ? console.log(JSON.stringify(err)) : undefined;
                 }
-                var fullPath = combinePaths(module.exports.home, path);
-                var self = this;
+                let fullPath = combinePaths(module.exports.home, path);
+                let self = this;
                 //Start an async process
                 asynchronous.start();
                 //Read the file at the path
@@ -109,17 +89,19 @@ function StirFry(port, ip) {
                     //Send the data and end the async process after calling the callback
                     self.send(data);
                     //Get the file extension
-                    //var fileExtension = (() => {var split = path.split(/\./g); return split[split.length - 1]})();
+                    //let fileExtension = (() => {let split = path.split(/\./g); return split[split.length - 1]})();
                     //if (fileExtension == 'html' || fileExtension == 'htm')
                     //res.writeHead(200, {
                     //    'Content-Type': 'text/html'
                     //});
-                    var fileExtension = (function() {
-                    	var split = path.split(/\./g);
-                    	return split[split.length - 1];
+                    let fileExtension = (function() {
+                        let split = path.split(/\./g);
+                        return split[split.length - 1];
                     })();
 
-                    res.writeHead(200, {'Content-Type': types[fileExtension]});
+                    res.writeHead(200, {
+                        'Content-Type': types[fileExtension]
+                    });
                     callbackToUse(false);
                     asynchronous.end();
                 })
@@ -129,7 +111,7 @@ function StirFry(port, ip) {
             send: function(data) {
                 this.response = Buffer.concat([Buffer(this.response), Buffer(data)]);
                 sendData = Buffer.concat([Buffer(sendData), Buffer(data)]);
-//		console.log(sendData);
+                //		console.log(sendData);
             },
             full: res,
             redirect: function(url) {
@@ -151,8 +133,8 @@ function StirFry(port, ip) {
                 res.end(data);
             },
             end: function(data) {
-		res.end(data);
-	    },
+                res.end(data);
+            },
             runFile: function(file) {
                 asynchronous.start();
                 //Read the file
@@ -162,10 +144,10 @@ function StirFry(port, ip) {
                     asynchronous.done();
                 })
             }
-	}
-	response.response = new Buffer('');
-        var waiting = 0;
-        var asynchronous = {
+        }
+        response.response = new Buffer('');
+        waiting = 0;
+        asynchronous = {
             start: function() {
                 waiting++;
             },
@@ -173,13 +155,13 @@ function StirFry(port, ip) {
                 waiting--;
                 if (waiting <= 0) {
                     res.end(response.response);
-		    //console.log(sendData);
+                    //console.log(sendData);
                 }
             }
         }
         asynchronous.end = asynchronous.done;
         //Create a request object
-        var request = {
+        request = {
             url: decodeURIComponent(req.url),
             method: req.method,
             full: req,
@@ -190,9 +172,9 @@ function StirFry(port, ip) {
 
 
 
-        var preWaiting = 0;
+        let preWaiting = 0;
         //The asynchronous stuff for the preprocessor
-        var preAsync = {
+        let preAsync = {
             //Function to start waiting
             start: function() {
                 preWaiting++;
@@ -212,9 +194,9 @@ function StirFry(port, ip) {
         }
         preAsync.end = preAsync.done;
 
-        var prePreWaiting = 0;
+        let prePreWaiting = 0;
         //The asynchronous stuff for the first layer
-        var prePreAsync = {
+        let prePreAsync = {
             //Function to start waiting
             start: function() {
                 prePreWaiting++;
@@ -249,7 +231,7 @@ function StirFry(port, ip) {
         if (req.method == 'POST') {
             async.start();
 
-            var postData = '';
+            let postData = '';
 
             req.full.on('data', function(data) {
                 postData += data;
@@ -270,18 +252,18 @@ function StirFry(port, ip) {
 
     this.process(function(req, res, end, async) {
         //Split the request by ?
-        var split = req.url.split('?');
+        let split = req.url.split('?');
         //res.send(split);
         if (split[1]) {
             //Clone req.url to req.fullUrl
             req.fullUrl = req.url.slice(0);
             //Now parse it
-            var parsed = parse(split[1]);
+            let parsed = parse(split[1]);
             req.url = split[0];
             //res.send(JSON.stringify(parsed));
 
-            var params = parsed;
-            for (var i in req.params) params[i] = req.params[i];
+            let params = parsed;
+            for (let i in req.params) params[i] = req.params[i];
             req.params = params;
             //res.send(JSON.stringify(req.params));
         }
@@ -303,33 +285,33 @@ StirFry.router = StirFry.extension;
  *
  * */
 StirFry.prototype.listen = function(port, ip, callback) {
-    var call = callback || function(e) {
+    let call = callback || function(e) {
         if (e) {
             console.error(e);
             this._callExceptions(e);
         }
     }
-    var self = this;
+    let self = this;
     //Get only number input
-    var portToUse = (function() {
-            var onlyNum;
-            for (var i in arguments)
-                if (typeof arguments[i] == 'number')
-                    onlyNum = arguments[i];
-            return onlyNum || self.port;
-        })()
-        //Get the only string inputted
-    var ipToUse = (function() {
-            var onlyString;
-            for (var i in arguments)
-                if (typeof arguments[i] == 'string')
-                    onlyString = arguments[i];
-            return onlyString || self.ip;
-        })()
-        //Get the only function input
-    var callbackToUse = (function() {
-        var onlyFunc;
-        for (var i in arguments)
+    let portToUse = (function() {
+        let onlyNum;
+        for (let i in arguments)
+            if (typeof arguments[i] == 'number')
+                onlyNum = arguments[i];
+        return onlyNum || self.port;
+    })()
+    //Get the only string inputted
+    let ipToUse = (function() {
+        let onlyString;
+        for (let i in arguments)
+            if (typeof arguments[i] == 'string')
+                onlyString = arguments[i];
+        return onlyString || self.ip;
+    })()
+    //Get the only function input
+    let callbackToUse = (function() {
+        let onlyFunc;
+        for (let i in arguments)
             if (typeof arguments[i] == 'function')
                 onlyFunc = arguments[i];
         return onlyFunc || function(e) {
@@ -347,8 +329,8 @@ StirFry.prototype.listen = function(port, ip, callback) {
  * @param {object} Options - Options for listening
  * @param {callback} Callback - The function to call on the event, it will get inputs depending on what event it is
  * @example
- * var StirFry = require('stirfry');
- * var server = new StirFry(8080, '127.0.0.1');
+ * let StirFry = require('stirfry');
+ * let server = new StirFry(8080, '127.0.0.1');
  * server.on('get', {url: '/abc.*', regex: true}, function(req, res) {
  *     res.send(req.url);
  * });
@@ -356,7 +338,7 @@ StirFry.prototype.listen = function(port, ip, callback) {
  * */
 StirFry.prototype.on = function(event, options, call, onetime) {
     //If call is undefined that means that actually options is undefined so set
-    var callToUse = call;
+    let callToUse = call;
     if (typeof options == 'function') {
         callToUse = options;
     }
@@ -390,12 +372,12 @@ StirFry.prototype.on = function(event, options, call, onetime) {
 //Function to call all the exceptions
 StirFry.prototype._callExceptions = function(err) {
     //Loop through
-    for (var i = 0; i < this.listens['exception'].length; i++) {
+    for (let i = 0; i < this.listens['exception'].length; i++) {
         //Call the exception
         this.listens['exception'][i].call(err);
     }
 }
-var ending = false;
+let ending = false;
 
 function end() {
     ending = true;
@@ -403,20 +385,20 @@ function end() {
 
 //A function to call the inputed layer
 StirFry.prototype._callLayer = function(layer, req, res, asynchronous) {
-	if (!req.params) req.params = {};
+    if (!req.params) req.params = {};
     ending = false;
     //Loop through all the gets
-    for (var i = 0; i < this.listens[layer].length; i++) {
+    for (let i = 0; i < this.listens[layer].length; i++) {
         //If its a regex
         if (this.listens[layer][i].options.regex) {
             //If the regex matches where i add ^ to the begginning and $ to the end
             if (RegExp('^' + this.listens[layer][i].options.url.source + "$").test(req.url)) {
                 //Call it with the request parameters as an array
-                var params = RegExp('^' + this.listens[layer][i].options.url.source + "$").exec(req.url).slice(1);
+                let params = RegExp('^' + this.listens[layer][i].options.url.source + "$").exec(req.url).slice(1);
                 //Loop through params and set req.params[i] to equal params[i]
-                for (var k in params) req.params[k] = params[k];
+                for (let k in params) req.params[k] = params[k];
                 this.listens[layer][i].call(req, res, end, asynchronous, this);
-                for (var k in params) delete req.params[k];
+                for (let k in params) delete req.params[k];
 
                 if (this.listens[layer][i].options.onetime) this.listens[layer].splice(i, 1);
 
@@ -427,14 +409,14 @@ StirFry.prototype._callLayer = function(layer, req, res, asynchronous) {
         }
         //Else if it is the same
         else {
-            var keys = [];
-            var params = pathToRegexp(this.listens[layer][i].options.url, keys).exec(req.url);
+            let keys = [];
+            let params = pathToRegexp(this.listens[layer][i].options.url, keys).exec(req.url);
             if (params) {
                 params = params.slice(1)
-                    //Loop through params and set req.params[i] to equal params[i]
-                for (var k in params) req.params[keys[k].name] = params[k];
+                //Loop through params and set req.params[i] to equal params[i]
+                for (let k in params) req.params[keys[k].name] = params[k];
                 this.listens[layer][i].call(req, res, end, asynchronous, this);
-                for (var k in params) delete req.params[keys[k].name];
+                for (let k in params) delete req.params[keys[k].name];
 
                 if (this.listens[layer][i].options.onetime) this.listens[layer].splice(i, 1);
 
@@ -454,14 +436,14 @@ StirFry.prototype._callRequests = function(req, res, asynchronous) {
 
 //Function to call all the pre processor requests
 StirFry.prototype._callPre = function(req, res, asynchronous) {
-	this._callLayer('pre', req, res, asynchronous);
+    this._callLayer('pre', req, res, asynchronous);
 
 }
 
 
 //Function to call all the pre processor requests
 StirFry.prototype._callProcessors = function(req, res, asynchronous) {
-	this._callLayer('processor', req, res, asynchronous);
+    this._callLayer('processor', req, res, asynchronous);
 }
 
 
@@ -470,11 +452,11 @@ StirFry.prototype._callProcessors = function(req, res, asynchronous) {
 /**
  * Is the same as StirFry.on('request')
  * @param {string/regexp} Url - Can be a string or regex, it gets tested against the request url to see if it should be called
- * @param {callback} Call - Gets called when there is a get request that matches the url variable, takes a request object and a response object as an input,
+ * @param {callback} Call - Gets called when there is a get request that matches the url letiable, takes a request object and a response object as an input,
  * @example
- * var StirFry = require('./index');
+ * let StirFry = require('./index');
  * //Create a new stir fry server
- * var server = new StirFry(8080, '0.0.0.0');
+ * let server = new StirFry(8080, '0.0.0.0');
  * //On any get request reply with the url
  * server.request('/', function(req, res) {
  *     res.send(req.url);
@@ -483,8 +465,8 @@ StirFry.prototype._callProcessors = function(req, res, asynchronous) {
  * server.listen();
  * */
 StirFry.prototype.request = function() {
-    var options = arguments[0];
-    var callToUse = arguments[1];
+    let options = arguments[0];
+    let callToUse = arguments[1];
     //If there is only 1 argument
     if (arguments.length == 1) {
         options = /.*/;
@@ -510,8 +492,8 @@ StirFry.prototype.req = StirFry.prototype.request;
  *
  * */
 StirFry.prototype.pre = function() {
-    var options = arguments[0];
-    var callToUse = arguments[1];
+    let options = arguments[0];
+    let callToUse = arguments[1];
     //If there is only 1 argument
     if (arguments.length == 1) {
         options = /.*/;
@@ -536,8 +518,8 @@ StirFry.prototype.pre = function() {
  *
  * */
 StirFry.prototype.process = function() {
-    var options = arguments[0];
-    var callToUse = arguments[1];
+    let options = arguments[0];
+    let callToUse = arguments[1];
     //If there is only 1 argument
     if (arguments.length == 1) {
         options = /.*/;
@@ -556,17 +538,17 @@ StirFry.prototype.process = function() {
  * server.send("${url}")
  * */
 StirFry.prototype.send = function(response, request) {
-	request = request || /.*/;
-	this.req(request, function(req, res) {
-		var send = response;
-		for (var i in req) {
-			send = send.replace("${" + i + "}", req[i]);
-		}
-		for (var i in res) {
-			send = send.replace("${" + i + "}", res[i]);
-		}
-		res.send(send);
-	})
+    request = request || /.*/;
+    this.req(request, function(req, res) {
+        let send = response;
+        for (let i in req) {
+            send = send.replace("${" + i + "}", req[i]);
+        }
+        for (let i in res) {
+            send = send.replace("${" + i + "}", res[i]);
+        }
+        res.send(send);
+    })
 }
 
 /**
@@ -578,10 +560,10 @@ StirFry.prototype.send = function(response, request) {
  * server.send("${url}")
  * */
 StirFry.prototype.sendFile = function(filename, request) {
-	request = request || /.*/;
-	this.req(request, function(req, res) {
-		res.sendFile(filename);
-	})
+    request = request || /.*/;
+    this.req(request, function(req, res) {
+        res.sendFile(filename);
+    })
 }
 
 //Static file server
@@ -591,8 +573,8 @@ StirFry.prototype.sendFile = function(filename, request) {
  * @param {boolean} End - Optional, whether
  * */
 StirFry.static = function(path, ending) {
-    var pathToUse = path;
-    var endToUse = ending;
+    let pathToUse = path;
+    let endToUse = ending;
     if (!path && !ending) pathToUse = '';
     if (path && !ending) {
         if (typeof path != 'string') {
@@ -600,11 +582,11 @@ StirFry.static = function(path, ending) {
             endToUse = path;
         }
         //pathToUse = combinePaths(module.exports.home, pathToUse);
-	}
+    }
     //Return a function
     return function(req, res, end, async) {
         //Check if the request is a folder
-        var combinedPath = combinePaths(pathToUse, req.url);
+        let combinedPath = combinePaths(pathToUse, req.url);
         async.start();
         fs.lstat(combinePaths(module.exports.home, combinedPath), function(err, stats) {
             if (err) {
@@ -613,9 +595,9 @@ StirFry.static = function(path, ending) {
                 return;
             }
             //Find out if it is a directory
-            var isDir = stats.isDirectory();
+            let isDir = stats.isDirectory();
             //Generate a path that has index.{extension} if needed
-            var pathToUse = isDir ? combinePaths(combinedPath, 'index.' + module.exports.defaultExtension) : combinedPath;
+            let pathToUse = isDir ? combinePaths(combinedPath, 'index.' + module.exports.defaultExtension) : combinedPath;
             //Read the file now
             res.sendFile(pathToUse);
             async.end();
@@ -628,8 +610,8 @@ StirFry.static = function(path, ending) {
 StirFry.prototype.use = function(obj) {
     if (obj.listens) {
         //Add all its listeners
-        for (var i in obj.listens) {
-            for (var k in obj.listens[i]) {
+        for (let i in obj.listens) {
+            for (let k in obj.listens[i]) {
                 this.listens[i][k] = obj.listens[i][k];
             }
         }
@@ -640,28 +622,27 @@ StirFry.prototype.use = function(obj) {
 
 //A logger use
 StirFry.logger = function(path) {
-    var extension = new StirFry.extension;
+    let extension = new StirFry.extension;
     extension.req(function(request, response) {
-        var log = `Request recieved with ${request.post ? `${JSON.stringify(request.post)} as post and `:``} ${request.fullUrl || request.url} as the url. Recieved from ${request.ip} on `+ formatDate(new Date());
-        var log = `Request recieved with ${request.post ? `${request.post} as post and `:``} ${request.fullUrl || request.url} as the url. Recieved from ${request.ip} on `+ formatDate(new Date());
-		console.log(log);
-		if (path) {
-			fs.appendFile(path, log + '\n');
-		}
-	});
-	return extension;
+        let log = `Request recieved with ${request.post ? `${JSON.stringify(request.post)} as post and `:``} ${request.fullUrl || request.url} as the url. Recieved from ${request.ip} on ` + formatDate(new Date());
+        console.log(log);
+        if (path) {
+            fs.appendFile(path, log + '\n');
+        }
+    });
+    return extension;
 }
 
 function formatDate(date) {
-	var months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
-	var days   = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-	var output = `${days[date.getDay()]}, the ${date.getDate()}${date.getDate()%10 == 1 && date.getDate() != 11 ? 'st':(date.getDate()%10 == 2 && date.getDate() != 12 ? 'nd':(date.getDate()%10 == 3 && date.getDate() != 13) ? 'rd':'th')} of ${months[date.getMonth()]}, ${date.getFullYear()} at ${date.getHours()}:${date.getMinutes().toString().length == 1 ? '0' + date.getMinutes.toString():date.getMinutes()}`;
-	return output;
+    let months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+    let days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+    let output = `${days[date.getDay()]}, the ${date.getDate()}${date.getDate()%10 == 1 && date.getDate() != 11 ? 'st':(date.getDate()%10 == 2 && date.getDate() != 12 ? 'nd':(date.getDate()%10 == 3 && date.getDate() != 13) ? 'rd':'th')} of ${months[date.getMonth()]}, ${date.getFullYear()} at ${date.getHours()}:${date.getMinutes().toString().length == 1 ? '0' + date.getMinutes.toString():date.getMinutes()}`;
+    return output;
 }
 
 //Function to combine to paths
 function combinePaths(path1, path2) {
-	var path1ToUse = path1.slice(-1) == '/' ? path1:(path1 + '/');
-	var path2ToUse = path2.slice(0, 1) == '/' ? path2.slice(1):path2;
-	return path1ToUse + path2ToUse;
+    let path1ToUse = path1.slice(-1) == '/' ? path1 : (path1 + '/');
+    let path2ToUse = path2.slice(0, 1) == '/' ? path2.slice(1) : path2;
+    return path1ToUse + path2ToUse;
 }
