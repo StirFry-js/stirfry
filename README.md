@@ -154,8 +154,14 @@ var server = new StirFry(8080);
 server.use(StirFry.logger("logFile"));
 ```
 
-#### Post Requests ##
+#### Post Requests ####
 You can access post data by accessing `request.post` as an associative array
+
+#### Creating Layers ####
+As of 1.6.0 StirFry allows the creation of custom layers in the server. The syntax for this involves the three functions `server.createLayer`, `server.destroyLayer`, and `server.placeLayer`.
+Create layer takes a string that is the name of the layer to create.
+Destroy layer is the same as create layer but it will remove the it instead of creating it.
+Place layer will take the names of two layers it will make it so that the layer that has the same name as the first input, always gets called after the layer that has the name of the second input.
 
 ## About ##
 <a name="about"></a>
