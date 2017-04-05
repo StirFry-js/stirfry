@@ -17,8 +17,9 @@ Next navigate to that folder in terminal and run this command:<br>
 `npm install stirfry`<br>
 That installs Stir Fry into the folder your server is running from. Next create a file called `server.js` and open it with your favourite code editor. Add this code: <br>
 ```javascript
-var StirFry = require('stirfry');
-var server  = new StirFry(8080);
+"use strict";
+let StirFry = require('stirfry');
+let server  = new StirFry(8080);
 server.request(function (request, response) {
     response.send("Hello World!");
 });
@@ -40,8 +41,9 @@ So by typing `response.send("Hello World!")` you made that the response.
 #### Preprocessing the request and response objects ####
 Stir Fry gives you the ability to preprocess the request and response objects. Basically that means you can write exensions and mods for stirfry. Here is an example
 ```javascript
-var StirFry = require('stirfry');
-var server  = new StirFry(8080);
+"use strict";
+let StirFry = require('stirfry');
+let server  = new StirFry(8080);
 server.pre(function(request, response) {
 	//Now I can change the request and response object before the next code runs
     request.doubleURL = request.url + request.url;
@@ -53,14 +55,16 @@ server.request(function(request, response) {
 ```
 #### Extensions ###
 You can create extensions using basically the same syntax as a normal server and use them just  by saying `server.use(extension)`, here is an example
+Keep in mind, extensions do not support adding layers. If you wish to create layers in your extension create a function that takes the server as an input and call it.
 ```javascript
-var StirFry   = require('stirfry');
-var extension = new StirFry.extension();
+"use strict";
+let StirFry   = require('stirfry');
+let extension = new StirFry.extension();
 //I can put more preprocessors and responders if I want
 extension.pre(function(request, response) {
 	request.doubleURL = request.url + request.url;
 });
-var server    = new StirFry(8080);
+let server = new StirFry(8080);
 server.use(extension);
 server.request(function(request, response) {
 	//I can use request.doubleURL
@@ -71,8 +75,9 @@ server.request(function(request, response) {
 ## Quick Start ##
 #### Creating your first server ####
 ```javascript
-var StirFry = require('stirfry');
-var server  = new StirFry(8080);
+"use strict";
+let StirFry = require('stirfry');
+let server  = new StirFry(8080);
 server.request(function (request, response) {
     response.send("Hello World!");
 });
@@ -81,8 +86,9 @@ This example creates a server on port 8080 and sets it to respond with `Hello Wo
 #### Static File Servers ##
 Stir Fry has a static file server method built in. All you need to do is this:
 ```javascript
-var StirFry = require('stirfry');
-var server  = new StirFry(8080);
+"use strict";
+let StirFry = require('stirfry');
+let server  = new StirFry(8080);
 server.request(StirFry.static('public'));
 ```
 Public is the folder that the files get served from.
@@ -90,10 +96,11 @@ Public is the folder that the files get served from.
 #### Asynchronous Operations ##
 Stir Fry lets you run multiple asynchronous operations at once. You can do all the preprocessing you want in the `server.process` layer, and then once all of those are done, it runs `server.pre` listeners, and once those are done it runs `server.request` listeners.
 ```javascript
-var StirFry = require('stirfry');
-var server  = new StirFry(8080);
+"use strict";
+let StirFry = require('stirfry');
+let server  = new StirFry(8080);
 
-var fs = require('fs');
+let fs = require('fs');
 
 server.pre(function (request, response, end, async) {
     async.start();
@@ -112,8 +119,9 @@ This program uses `fs.readFile` to add a property to the response object and the
 #### Sending Files ##
 Stir Fry has a built in `response.sendFile` method, here is an example:
 ```javascript
-var StirFry = require('stirfry');
-var server  = new StirFry(8080);
+"use strict";
+let StirFry = require('stirfry');
+let server  = new StirFry(8080);
 server.request(function (request, response) {
     response.sendFile('file.html');
 });
@@ -121,8 +129,9 @@ server.request(function (request, response) {
 #### Responding Only to Certain Requests ##
 When you create a request, preprocessor, or processor listener, you have the option of limiting it to certain requests by regex matching. Here is an example:
 ```javascript
-var StirFry = require('stirfry');
-var server  = new StirFry(8080);
+"use strict";
+let StirFry = require('stirfry');
+let server  = new StirFry(8080);
 server.request(/\/.*?\/hi/, function (request, response) {
     response.send("hi");
 });
@@ -135,22 +144,25 @@ Just write `server.use(thePluginObject)`
 #### Creating Plugins ####
 Creating plugins works in a very similar way as creating servers. The only difference is you use `new StirFry.extension()` instead of `new StirFry()`. Then you can say `server.use(extension)` and it manages all of the listeners. Here is an example
 ```javascript
-var StirFry = require('stirfry');
-var extension = new StirFry.extension();
+"use strict";
+let StirFry = require('stirfry');
+let extension = new StirFry.extension();
 extension.req(function(request, response) {
-	var log = `Request recieved with ${request.post ? `${request.post} as post and `:``} ${request.fullUrl || request.url} as the url. Recieved from ${request.ip} on `+ formatDate(new Date()); //Format date is defined externally
+	let log = `Request recieved with ${request.post ? `${request.post} as post and `:``} ${request.fullUrl || request.url} as the url. Recieved from ${request.ip} on `+ formatDate(new Date()); //Format date is defined externally
 	console.log(log);
 });
 ```
 That is similar to the built in logger extension. Here is how you can use it
 ```javascript
-var server = new StirFry(8080);
+"use strict";
+let server = new StirFry(8080);
 server.use(extension);
 ```
-The built in logger is a function that returns an extension because I wanted people to be able to define a log file
+The built in logger is a function that returns an extension because people are able to define a log file
 ```javascript
-var StirFry = require('stirfry');
-var server = new StirFry(8080);
+"use strict";
+let StirFry = require('stirfry');
+let server = new StirFry(8080);
 server.use(StirFry.logger("logFile"));
 ```
 
@@ -162,6 +174,16 @@ As of 1.6.0 StirFry allows the creation of custom layers in the server. The synt
 Create layer takes a string that is the name of the layer to create.
 Destroy layer is the same as create layer but it will remove the it instead of creating it.
 Place layer will take the names of two layers it will make it so that the layer that has the same name as the first input, always gets called after the layer that has the name of the second input.
+```javascript
+"use strict";
+let StirFry = require('../../stirfry.js');
+let server = new StirFry(8080, '0.0.0.0');
+server.createLayer('final');
+server.placeLayer('final', 'request');
+server.addListenerOnLayer('final', function(req, res) {
+    res.send('Hello World!');
+});
+```
 
 ## About ##
 <a name="about"></a>

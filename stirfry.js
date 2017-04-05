@@ -273,7 +273,14 @@ StirFry.prototype.listen = function(port, ip, callback) {
             }
         }
     })()
-    this.server.listen(portToUse, ipToUse, callbackToUse);
+    this.server.listen(portToUse, ipToUse, function() {
+        self.close = function() {
+            self.server.close();
+            delete self.close;
+        }
+        callbackToUse.apply(self, arguments);
+    });
+    
 }
 /**
  * Listens for an event and call a function when it happen
