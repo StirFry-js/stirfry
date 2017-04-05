@@ -45,24 +45,13 @@ function StirFry(port, ip) {
         'pre': true,
         'processor': true
     };
+    this.layerOrder = ['processor', 'pre', 'request'];
     let that = this;
     //The function to call on a request
     this.respond = function(req, res) {
         //Create a response object
         let sendData = new Buffer('');
         let waiting = 0;
-        let asynchronous = {
-            start: function() {
-                waiting++;
-            },
-            done: function() {
-                waiting--;
-                if (waiting <= 0) {
-                    res.end(sendData);
-                }
-            }
-        }
-        asynchronous.end = asynchronous.done;
         //Create a request object
         let request = {
             url: decodeURIComponent(req.url),
@@ -72,8 +61,6 @@ function StirFry(port, ip) {
             connection: req.connection,
             headers: req.headers
         }
-
-
         //Create a response object
         let response = {
             //A function to send a file at a certain path
@@ -155,77 +142,34 @@ function StirFry(port, ip) {
         }
         response.response = new Buffer('');
         waiting = 0;
-        asynchronous = {
-            start: function() {
-                waiting++;
-            },
-            done: function() {
-                waiting--;
-                if (waiting <= 0) {
-                    res.end(response.response);
-                    //console.log(sendData);
-                }
-            }
-        }
-        asynchronous.end = asynchronous.done;
-        //Create a request object
-        request = {
-            url: decodeURIComponent(req.url),
-            method: req.method,
-            full: req,
-            ip: req.connection.remoteAddress,
-            connection: req.connection,
-            headers: req.headers
-        }
+        let currentLayer = -1;
+        let self = that;
+        function callNextLayer() {
+            currentLayer++;
+            if (currentLayer < self.layerOrder.length) {
+                let waiting = 0;
+                let async = {
+                    //Function to start waiting
+                    start: function() {
+                        waiting++;
+                    },
+                    //Function to end waiting
+                    done: function() {
+                        waiting--;
 
-
-
-        let preWaiting = 0;
-        //The asynchronous stuff for the preprocessor
-        let preAsync = {
-            //Function to start waiting
-            start: function() {
-                preWaiting++;
-            },
-            //Function to end waiting
-            done: function() {
-                preWaiting--;
-
-                //Check if everything is done
-                if (preWaiting <= 0) {
-                    that._callRequests(request, response, asynchronous);
-                    if (waiting <= 0) {
-                        asynchronous.done();
+                        //Check if everything is done
+                        if (waiting <= 0) {
+                            if (currentLayer < self.layerOrder.length - 1) callNextLayer();
+                            else res.end(response.response);
+                        }
                     }
                 }
+                async.end = async.done;
+                self._callLayer(self.layerOrder[currentLayer], request, response, async);
+                if (waiting <= 0) async.done();
             }
         }
-        preAsync.end = preAsync.done;
-
-        let prePreWaiting = 0;
-        //The asynchronous stuff for the first layer
-        let prePreAsync = {
-            //Function to start waiting
-            start: function() {
-                prePreWaiting++;
-            },
-            //Function to end waiting
-            done: function() {
-                prePreWaiting--;
-
-                //Check if everything is done
-                if (prePreWaiting <= 0) {
-                    that._callPre(request, response, preAsync);
-                    if (preWaiting <= 0) {
-                        preAsync.done();
-                    }
-                }
-            }
-        }
-        preAsync.end = preAsync.done;
-
-        that._callProcessors(request, response, prePreAsync);
-        if (prePreWaiting <= 0) prePreAsync.done();
+        callNextLayer();
 
     }
 
@@ -342,7 +286,6 @@ StirFry.prototype.listen = function(port, ip, callback) {
  * server.on('get', {url: '/abc.*', regex: true}, function(req, res) {
  *     res.send(req.url);
  * });
- * server.listen();
  * */
 StirFry.prototype.on = function(event, options, call, onetime) {
     //If call is undefined that means that actually options is undefined so set
@@ -437,6 +380,7 @@ StirFry.prototype._callLayer = function(layer, req, res, asynchronous) {
     }
 }
 
+
 StirFry.prototype.createLayer = function(name) {
     if (this.listens[name]) {
         throw new Error("There is already a listener defined as " + name);
@@ -444,6 +388,7 @@ StirFry.prototype.createLayer = function(name) {
     }
     this.listens[name] = [];
     this.layers[name] = true;
+    this.layerOrder.push(name);
 }
 
 StirFry.prototype.destroyLayer = function(layer) {
@@ -453,8 +398,13 @@ StirFry.prototype.destroyLayer = function(layer) {
     }
     delete this.listens[name];
     this.layers[name] = false;
+    this.layerOrder.splice(this.layerOrder.indexOf(layer), 1);
 }
 
+StirFry.prototype.placeLayer = function(layer, after) {
+    this.layerOrder.splice(this.layerOrder.indexOf(layer), 1);
+    this.layerOrder.splice(this.layerOrder.indexOf(after) + 1, 0, layer);
+}
 //Function to call all the get request
 StirFry.prototype._callRequests = function(req, res, asynchronous) {
     this._callLayer('request', req, res, asynchronous);
@@ -471,9 +421,34 @@ StirFry.prototype._callProcessors = function(req, res, asynchronous) {
     this._callLayer('processor', req, res, asynchronous);
 }
 
-
-
 //Just a bunch of aliases
+/**
+ * Will listen on a target layer as an input string instead of the normal hard coded strings
+ * @param {string} Layer - The layer to call
+ * @param {string/regexp} Url - Can be a string or regexp, it gets tested against the url to see if it should be called
+ * @param {callback} Callback - Gets called when there is a request on that url in that layer placement. Takes a request and response object as an input, plus optionally the "end" and "async" objects
+ * @example
+ * let StirFry = require('stirfry');
+ * let server = new StirFry(8080, '0.0.0.0');
+ * server.addLayer("example layer");
+ * server.placeLayer("example layer", "pre");
+ * server.addListenerOnLayer("example layer", function(req, res) {
+ *      res.send("test");
+ * });
+ * 
+ */
+StirFry.prototype.addListenerOnLayer = function() {
+    if (typeof arguments[0] != "string") throw new Error("Layer is not string");
+    let options = arguments[1];
+    let callToUse = arguments[2];
+    //If there is only 1 argument
+    if (arguments.length == 2) {
+        options = /.*/;
+        callToUse = arguments[1];
+    }
+    //Push an object where the url is the options input and whether is regex or not is set automagically
+    this.on(arguments[0], options, callToUse, arguments[3]);
+}
 /**
  * Is the same as StirFry.on('request')
  * @param {string/regexp} Url - Can be a string or regex, it gets tested against the request url to see if it should be called
@@ -486,8 +461,6 @@ StirFry.prototype._callProcessors = function(req, res, asynchronous) {
  * server.request('/', function(req, res) {
  *     res.send(req.url);
  * });
- * //Listen for requests
- * server.listen();
  * */
 StirFry.prototype.request = function() {
     let options = arguments[0];
