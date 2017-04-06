@@ -1,7 +1,7 @@
 {
   "name": "stirfry",
-  "version": "1.6.1",
-  "description": "Stir fry is a self contained and easy to use web framework.",
+  "version": "1.6.2",
+  "description": "StirFry is a self contained and easy to use web framework.",
   "main": "stirfry.js",
   "repository": {
     "type": "git",
@@ -13,14 +13,17 @@
     "StirFry"
   ],
   "scripts": {
-    "test": "node_modules/.bin/mocha -w"
+    "test": "node_modules/.bin/mocha -w --recursive"
   },
   "author": "Alex Waese-Perlman",
   "license": "MIT",
   "dependencies": {
-    "path-to-regexp": "^1.5.0"
+    "path-to-regexp": "^1.5.0",
+    "require-main-filename": "^1.0.1"
   },
   "devDependencies": {
+    "eslint": "^3.19.0",
+    "eslint-plugin-import": "^2.2.0",
     "mocha": "^3.2.0",
     "request": "^2.81.0",
     "should": "^11.2.1"
