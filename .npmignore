@@ -1,7 +1,3 @@
-*
-!stirfry.js
-!README.md
-!LICENSE
-!node_modules
-!types.json
-!utils
+.npmignore
+node_modules
+.vscode
