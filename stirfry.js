@@ -655,7 +655,7 @@ StirFry.static = function (path, ending, handler) {
 	}
 	if (typeof handler == 'undefined') {
 		handler = function(err, req, res) {
-			res.send(err);
+			res.send(JSON.stringify(err));
 		};
 	}
 
