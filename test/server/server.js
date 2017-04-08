@@ -6,7 +6,6 @@ const StirFry = require('../../stirfry.js');
 const request = require('request');
 const path = require('path');
 const fs = require('fs');
-const pem = require('pem');
 
 describe('the server object', function() {
 	describe('server.send', function() {
@@ -184,6 +183,24 @@ describe('the server object', function() {
 				if (error) done(error);
 				response.body.should.equal('ERROR 404');
 				done();
+			});
+		});
+		it('should call a function if there is no file in a static server', function(done) {
+			const server = new StirFry(8080);
+
+			server.req(StirFry.static(path.resolve(__dirname, '../testFiles/'), function(e, req, res) {
+				res.send('ERROR 404');
+			}));
+			
+			request('http://localhost:8080/test.html', function(error, response) {
+				if (error) done(error);
+				response.body.should.equal(fs.readFileSync(path.resolve(__dirname, '../testFiles/test.html')).toString());
+				request('http://localhost:8080/tes.html', function(rerror, rresponse) {
+					server.close();
+					if (rerror) done(rerror);
+					rresponse.body.should.equal('ERROR 404');
+					done();
+				});
 			});
 		});
 	});

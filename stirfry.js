@@ -632,19 +632,32 @@ StirFry.prototype.sendFile = function (filename, request) {
  * Generates a response function for the desired folder for serving static files.
  * @param {string} path - Optional, the home path to serve files from
  * @param {boolean} ending - The default file extension
+ * @param {callback} handler - The error handler
  * @returns {function} Function for input into .req
  * */
-StirFry.static = function (path, ending) {
+StirFry.static = function (path, ending, handler) {
 	let pathToUse = path;
 
-	if (!path && !ending) pathToUse = '';
+	if (!path && !ending) {
+		pathToUse = '';
+		ending = module.exports.defaultExtension;
+	}
 	if (path && !ending) {
 		if (typeof path !== 'string') {
 			pathToUse = '';
+			ending = module.exports.defaultExtension;
 		}
 		// pathToUse = combinePaths(module.exports.home, pathToUse);
 	}
-	const self = this;
+	if (typeof ending == 'function') {
+		handler = ending;
+		ending = module.exports.defaultExtension;
+	}
+	if (typeof handler == 'undefined') {
+		handler = function(err, req, res) {
+			res.send(err);
+		};
+	}
 
 	// Return a function
 	return function (req, res, end, async) {
@@ -652,10 +665,11 @@ StirFry.static = function (path, ending) {
 		const combinedPath = combinePaths(pathToUse, req.url);
 
 		async.start();
-		fs.lstat(combinePaths(module.exports.home, combinedPath), (err, stats) => {
+		fs.lstat(pathFuncs.isAbsolute(combinedPath) ? combinedPath : combinePaths(module.exports.home, combinedPath), (err, stats) => {
 			if (err) {
+				handler(err, req, res, end, async);
 				async.end();
-				self.throwError(new Error(err), err);
+				return;
 			}
 			// Find out if it is a directory
 			const isDir = stats.isDirectory();
