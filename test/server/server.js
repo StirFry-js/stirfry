@@ -60,7 +60,8 @@ describe('the server object', function() {
 	});
 	describe('server.sendFile', function() {
 		it('should send files', function(done) {
-			let server = new StirFry(8080);
+			const server = new StirFry(8080);
+
 			server.sendFile(path.resolve(__dirname, '../testFiles/test.html'));
 
 			request('http://localhost:8080', function(error, response) {
@@ -77,8 +78,8 @@ describe('the server object', function() {
 	});
 	describe('importing servers', function() {
 		it('should accept other servers into the .use function', function(done) {
-			let server = new StirFry(8080);
-			let ext = new StirFry.extension();
+			const server = new StirFry(8080);
+			const ext = new StirFry.extension();
 
 			ext.pre(function(req, res) {
 				res.send('hello ');
@@ -97,7 +98,8 @@ describe('the server object', function() {
 	});
 	describe('onetime', function() {
 		it('should only be called once', function(done) {
-			let server = new StirFry(8080);
+			const server = new StirFry(8080);
+
 			server.req(function(req, res) {
 				res.send('hello world');
 			}, true);
@@ -115,7 +117,8 @@ describe('the server object', function() {
 	});
 	describe('creating and deleting layers', function() {
 		it('should be able to create layers', function(done) {
-			let server = new StirFry(8080);
+			const server = new StirFry(8080);
+
 			server.createLayer('final');
 			server.placeLayer('final', 'request');
 			server.createLayer('beforeFinal');
@@ -139,7 +142,8 @@ describe('the server object', function() {
 			});
 		});
 		it('should be able to delete layers', function(done) {
-			let server = new StirFry(8080);
+			const server = new StirFry(8080);
+
 			server.createLayer('final');
 			server.placeLayer('final', 'request');
 			server.createLayer('beforeFinal');
