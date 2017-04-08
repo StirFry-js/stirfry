@@ -14,7 +14,7 @@ module.exports = module.exports = {
 		"no-empty-character-class": 2,
 		"no-empty": 2,
 		"no-extra-parens": [1,"all"],
-		"no-extra-semi": 1,
+		"no-extra-semi": 2,
 		"no-irregular-whitespace": 2,
 		"valid-jsdoc": 2,
 		"block-scoped-var": 2,
@@ -31,7 +31,7 @@ module.exports = module.exports = {
 		"no-mixed-spaces-and-tabs": [2,"smart-tabs"],
 		"no-multiple-empty-lines": [1,{"max":2}],
 		"object-curly-spacing": [1,"never",{"arraysInObjects":true,"objectsInObjects":true}],
-		"semi": [1,"always"],
+		"semi": [2,"always"],
 		"arrow-parens": [1,"always"],
 		"arrow-spacing": [1,{"before":true,"after":true}],
 		"no-var": 1,
@@ -39,7 +39,6 @@ module.exports = module.exports = {
 		"prefer-const": 1,
 		"prefer-spread": 1,
 		"key-spacing": [1,{"afterColon":true}],
-		"operator-linebreak": 1,
-		"quotes": [1,"backtick","single"],
+		"operator-linebreak": 1
   	}
 };
