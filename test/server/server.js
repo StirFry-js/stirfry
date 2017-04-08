@@ -6,6 +6,7 @@ const StirFry = require('../../stirfry.js');
 const request = require('request');
 const path = require('path');
 const fs = require('fs');
+const pem = require('pem');
 
 describe('the server object', function() {
 	describe('server.send', function() {
@@ -165,6 +166,24 @@ describe('the server object', function() {
 					response.body.should.equal('hello');
 					done();
 				});
+			});
+		});
+	});
+	describe('error handling', function() {
+		it('should call a function if there is no file', function(done) {
+			const server = new StirFry(8080);
+
+			server.req(function(req, res) {
+				res.sendFile('someFileThatDoesntExist', function() {
+					res.send('ERROR 404');
+				});
+			});
+			
+			request('http://localhost:8080', function(error, response) {
+				server.close();
+				if (error) done(error);
+				response.body.should.equal('ERROR 404');
+				done();
 			});
 		});
 	});

@@ -2,6 +2,7 @@
 
 const pathToRegexp = require('path-to-regexp');
 const http = require('http');
+const https = require('https');
 const fs = require('fs');
 const pathFuncs = require('path');
 const parse = require('./utils/parse');
@@ -16,19 +17,44 @@ const types = require(`${__dirname}/types`);
  * @class
  * @param {integer} port - The port for the server to listen on
  * @param {string} ip - The IP for the server to listen on
- * @param {callback} Callback - Optional, runs as soon as the server starts
+ * @param {callback} callback - Optional, runs as soon as the server starts
  *
  *
  * */
-function StirFry(port, ip) {
+function StirFry() {
 	// If ip is not a string than it is the callback so just use '127.0.0.1' as the ip
-	const ipToUse = typeof ip === 'string' ? ip : '127.0.0.1';
-	let listen = true;
+	//const ipToUse = typeof ip === 'string' ? ip : '127.0.0.1';
+	//let listen = true;
+	//Loop through the inputs and find every string, integer, function, and boolean
+	//if (typeof port === 'boolean') listen = port;
 
-	if (typeof port === 'boolean') listen = port;
+	let options = {
+		listen: true
+	};
+	let port = 8080;
+	let ip = '127.0.0.1';
+	let callback = function() {};
+
+	for (let i = 0; i < arguments.length; i++) {
+		switch (typeof arguments[i]) {
+		case 'object':
+			options = arguments[i];
+			break;
+		case 'string':
+			ip = arguments[i];
+			break;
+		case 'number':
+			port = arguments[i];
+			break;
+		case 'function':
+			callback = arguments[i];
+			break;
+		}
+	}
+
 	// Initialize all of the properties
 	this.port = port;
-	this.ip = ipToUse;
+	this.ip = ip;
 	this.listens = {
 		request: [],
 		pre: [],
@@ -65,7 +91,7 @@ function StirFry(port, ip) {
 				if (!callback) {
 					callbackToUse = (err) => {
 						if (err) {
-							throw new Error(JSON.stringify(err));
+							that.throwError(new Error(err), err);
 						}
 					};
 				}
@@ -167,8 +193,8 @@ function StirFry(port, ip) {
 
 
 	this.server = http.createServer(this.respond);
-	if (listen) {
-		this.listen();
+	if (options.listen) {
+		this.listen(callback);
 	}
 	this.process((req, res, ef, async) => {
 		// Retrieve post data
@@ -180,8 +206,8 @@ function StirFry(port, ip) {
 			postData += data;
 
 			// Too much POST data, kill the connection!
-			// 1e6 === 1 * Math.pow(10, 6) === 1 * 1000000 ~~~ 1MB
-			if (postData.length > 1e6) {
+			// 1e8 === 1 * Math.pow(10, 8) === 1 * 100000000 ~~~ 100MB
+			if (postData.length > 1e8) {
 				req.connection.destroy();
 			}
 		});
@@ -218,8 +244,23 @@ function StirFry(port, ip) {
 
 // An express style router
 StirFry.extension = function () {
-	return new StirFry(false);
+	return new StirFry({listen: false});
 };
+StirFry.https = function(port, ip, cert) {
+	if (typeof ip == 'object') {
+		cert = ip;
+		ip = '127.0.0.1';
+	}
+	const server = new StirFry({listen: false});
+
+	server.server = https.createServer(cert, this.respond);
+	server.ip = ip;
+	server.port = port;
+	server.listen();
+
+	return server;
+};
+
 StirFry.router = StirFry.extension;
 /**
  * Starts the server listening on the port and ip that were inputted during the construction
@@ -262,8 +303,7 @@ StirFry.prototype.listen = function () {
 		}
 		return onlyFunc || function (e) {
 			if (e) {
-				this._callExceptions(e);
-				throw new Error(e);
+				self.throwError(new Error(e), e);
 			}
 		};
 	})();
@@ -321,7 +361,7 @@ StirFry.prototype.on = function (event, options, call, onetime) {
 	}
 	else {
 		// Say that they requested a nonexistent event
-		throw new Error(event + ' is not an event that has been defined');
+		this.throwError(new Error(event + ' is not an event that has been defined'), event + ' is not an event that has been defined');
 	}
 };
 
@@ -391,7 +431,7 @@ StirFry.prototype._callLayer = function (layer, req, res, asynchronous) {
 
 StirFry.prototype.createLayer = function (name) {
 	if (this.listens[name]) {
-		throw new Error('There is already a listener defined as ' + name);
+		this.throwError(new Error('There is already a listener defined as ' + name), 'There is already a listener defined as ' + name);
 	}
 	this.listens[name] = [];
 	this.layers[name] = true;
@@ -400,7 +440,7 @@ StirFry.prototype.createLayer = function (name) {
 
 StirFry.prototype.destroyLayer = function (layer) {
 	if (!this.layers[layer]) {
-		throw new Error('There is no layer of the name ' + layer);
+		this.throwError(new Error('There is no layer of the name ' + layer), 'There is no layer of the name ' + layer);
 	}
 	delete this.listens[layer];
 	this.layers[layer] = false;
@@ -445,7 +485,7 @@ StirFry.prototype._callProcessors = function (req, res, asynchronous) {
  * 
  */
 StirFry.prototype.addListenerOnLayer = function () {
-	if (typeof arguments[0] !== 'string') throw new Error('Layer is not string');
+	if (typeof arguments[0] !== 'string') this.throwError(new Error('Layer is not string'), 'Layer is not a string');
 	let options = arguments[1];
 	let callToUse = arguments[2];
 	// If there is only 1 argument
@@ -470,7 +510,7 @@ StirFry.prototype.addListenerOnLayer = function () {
  * let server = new StirFry(8080, '0.0.0.0');
  * //On any get request reply with the url
  * server.request('/', function(req, res) {
- *	 res.send(req.url);
+ *     res.send(req.url);
  * });
  * @returns {void}
  * */
@@ -604,6 +644,8 @@ StirFry.static = function (path, ending) {
 		}
 		// pathToUse = combinePaths(module.exports.home, pathToUse);
 	}
+	const self = this;
+
 	// Return a function
 	return function (req, res, end, async) {
 		// Check if the request is a folder
@@ -613,7 +655,7 @@ StirFry.static = function (path, ending) {
 		fs.lstat(combinePaths(module.exports.home, combinedPath), (err, stats) => {
 			if (err) {
 				async.end();
-				throw new Error(err);
+				self.throwError(new Error(err), err);
 			}
 			// Find out if it is a directory
 			const isDir = stats.isDirectory();
@@ -647,6 +689,15 @@ StirFry.prototype.use = function (obj) {
 		}
 		return;
 	}
+};
+
+StirFry.prototype.throwError = function(error, message) {
+	this._callExceptions(message);
+	this.throw(error);
+};
+
+StirFry.prototype.throw = function(error) {
+	console.error(error);
 };
 
 // A logger use

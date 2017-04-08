@@ -7,7 +7,7 @@ module.exports = module.exports = {
 	},
   	"rules": {
 		"comma-dangle": [1,"never"],
-    	"no-console": 2,
+    	"no-console": 1,
 		"no-dupe-args": 2,
 		"no-dupe-keys": 2,
 		"no-duplicate-case": 2,
@@ -39,6 +39,7 @@ module.exports = module.exports = {
 		"prefer-const": 1,
 		"prefer-spread": 1,
 		"key-spacing": [1,{"afterColon":true}],
-		"operator-linebreak": 1
+		"operator-linebreak": 1,
+		"vars-on-top": 1
   	}
 };
