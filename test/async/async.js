@@ -2,15 +2,15 @@
 /*eslint no-unused-vars: ["error", { "varsIgnorePattern": "(should|describe|it)" }]*/
 /*global describe it:true*/
 
-let should = require('should');
-let StirFry = require('../../stirfry.js');
-let request = require('request');
-let path = require('path');
-let fs = require('fs');
-describe('the response object', function() {
+const should = require('should');
+const StirFry = require('../../stirfry.js');
+const request = require('request');
+
+describe('the async object', function() {
 	describe('timeouts', function() {
 		it('has a .end function. WARNING: this test involves a setTimeout and is very slow', function(done) {
-			let server = new StirFry(8080);
+			const server = new StirFry(8080);
+
 			server.req(function(req, res, end, async) {
 				async.start();
 				setTimeout(function() {
@@ -28,7 +28,8 @@ describe('the response object', function() {
 			});
 		});
 		it('has a .done function. WARNING: this test involves a setTimeout and is very slow', function(done) {
-			let server = new StirFry(8080);
+			const server = new StirFry(8080);
+
 			server.req(function(req, res, end, async) {
 				async.start();
 				setTimeout(function() {
@@ -46,7 +47,8 @@ describe('the response object', function() {
 			});
 		});
 		it('should work on all layers. WARNING: this test involves a setTimeout and is very slow', function(done) {
-			let server = new StirFry(8080);
+			const server = new StirFry(8080);
+
 			server.pre(function(req, res, end, async) {
 				async.start();
 				setTimeout(function() {

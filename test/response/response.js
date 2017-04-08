@@ -2,15 +2,17 @@
 /*eslint no-unused-vars: ["error", { "varsIgnorePattern": "(should|describe|it)" }]*/
 /*global describe it:true*/
 
-let should = require('should');
-let StirFry = require('../../stirfry.js');
-let request = require('request');
-let path = require('path');
-let fs = require('fs');
+const should = require('should');
+const StirFry = require('../../stirfry.js');
+const request = require('request');
+const path = require('path');
+const fs = require('fs');
+
 describe('the response object', function() {
 	//Send
 	it('has a send function', function(done) {
-		let server = new StirFry(8080);
+		const server = new StirFry(8080);
+
 		server.req(function(req, res) {
 			res.send('hello world');
 		});
@@ -25,7 +27,8 @@ describe('the response object', function() {
 	});
 	//Send File
 	it('has a sendFile function', function(done) {
-		let server = new StirFry(8080);
+		const server = new StirFry(8080);
+
 		server.req(function(req, res) {
 			res.sendFile(path.resolve(__dirname, '../testFiles/test.html'));
 		});
@@ -43,12 +46,14 @@ describe('the response object', function() {
 	});
 	//Redirect
 	it('has a redirect function', function(done) {
-		let server = new StirFry(8080);
-		let redirectServer = new StirFry(3020);
+		const server = new StirFry(8080);
+		const redirectServer = new StirFry(3020);
+
 		redirectServer.req(function(req, res) {
 			res.send('Redirect worked');
 		});
-		let url = 'http://localhost:3020';
+		const url = 'http://localhost:3020';
+
 		server.req(function(req, res) {
 			res.redirect(url);
 		});
@@ -66,7 +71,8 @@ describe('the response object', function() {
 	});
 	//Set header
 	it('can set headers', function(done) {
-		let server = new StirFry(8080);
+		const server = new StirFry(8080);
+
 		server.req(function(req, res) {
 			res.writeHead(404);
 		});
@@ -79,7 +85,8 @@ describe('the response object', function() {
 	});
 	//Write header
 	it('can write headers', function(done) {
-		let server = new StirFry(8080);
+		const server = new StirFry(8080);
+
 		server.req(function(req, res) {
 			res.setHeader('content-type', 'text/html');
 		});
@@ -92,7 +99,8 @@ describe('the response object', function() {
 	});
 	//End
 	it('should have an end property which ends the connection', function(done) {
-		let server = new StirFry(8080);
+		const server = new StirFry(8080);
+
 		server.req(function(req, res) {
 			res.send('hello ');
 			res.end('world');
@@ -107,7 +115,8 @@ describe('the response object', function() {
 	});
 	//Stop
 	it('should have a stop property that ends the connection while resetting the text', function(done) {
-		let server = new StirFry(8080);
+		const server = new StirFry(8080);
+
 		server.req(function(req, res) {
 			res.send('hello ');
 			res.stop('world');

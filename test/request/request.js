@@ -121,4 +121,34 @@ describe('the request object', function () {
 		});
 		
 	});
+	describe('parameters', function() {
+		it('can take get parameters', function(done) {
+			const server = new StirFry(8080);
+
+			server.req(function(req, res) {
+				res.send(req.params.input);
+			});
+
+			request('http://localhost:8080/?input=hello%20world', function(error, response) {
+				server.close();
+				if (error) done(error);
+				response.body.should.equal('hello world');
+				done();
+			});
+		});
+		it('can take parameters in the url', function(done) {
+			const server = new StirFry(8080);
+
+			server.req('/folder/:file', function(req, res) {
+				res.send(req.params.input);
+			});
+
+			request('http://localhost:8080/?input=hello%20world', function(error, response) {
+				server.close();
+				if (error) done(error);
+				response.body.should.equal('hello world');
+				done();
+			});
+		});
+	});
 });
