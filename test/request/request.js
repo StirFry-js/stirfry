@@ -140,10 +140,24 @@ describe('the request object', function () {
 			const server = new StirFry(8080);
 
 			server.req('/folder/:file', function(req, res) {
-				res.send(req.params.input);
+				res.send(req.params.file);
 			});
 
-			request('http://localhost:8080/?input=hello%20world', function(error, response) {
+			request('http://localhost:8080/folder/something', function(error, response) {
+				server.close();
+				if (error) done(error);
+				response.body.should.equal('something');
+				done();
+			});
+		});
+		it('can take parameters in the url and get parameters', function(done) {
+			const server = new StirFry(8080);
+
+			server.req('/folder/:file', function(req, res) {
+				res.send(req.params.file + ' ' + req.params.value);
+			});
+
+			request('http://localhost:8080/folder/hello?value=world', function(error, response) {
 				server.close();
 				if (error) done(error);
 				response.body.should.equal('hello world');
