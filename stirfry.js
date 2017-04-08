@@ -282,7 +282,7 @@ StirFry.prototype.listen = function () {
  * @param {string} event - The type of event to listen for
  * @param {object} options - Options for listening
  * @param {callback} call - The function to call on the event, it will get inputs depending on what event it is
- * @param {onetime} onetime - 
+ * @param {onetime} onetime - Whether or not the handler can be used more than once
  * @example
  * let StirFry = require('stirfry');
  * let server = new StirFry(8080, '127.0.0.1');
@@ -450,7 +450,7 @@ StirFry.prototype.addListenerOnLayer = function () {
 	let callToUse = arguments[2];
 	// If there is only 1 argument
 
-	if (arguments.length == 2 || (typeof arguments[2] == "boolean" && arguments.length == 3)) {
+	if (arguments.length == 2 || typeof arguments[2] == "boolean" && arguments.length == 3) {
 		options = /.*/;
 		callToUse = arguments[1];
 	}
@@ -479,7 +479,7 @@ StirFry.prototype.request = function () {
 	let callToUse = arguments[1];
 	// If there is only 1 argument
 
-	if (arguments.length == 1 || (typeof arguments[1] == "boolean" && arguments.length == 2)) {
+	if (arguments.length == 1 || typeof arguments[1] == "boolean" && arguments.length == 2) {
 		options = /.*/;
 		callToUse = arguments[0];
 	}
@@ -508,7 +508,7 @@ StirFry.prototype.pre = function () {
 	let callToUse = arguments[1];
 	// If there is only 1 argument
 
-	if (arguments.length == 1 || (typeof arguments[1] == "boolean" && arguments.length == 2)) {
+	if (arguments.length == 1 || typeof arguments[1] == "boolean" && arguments.length == 2) {
 		options = /.*/;
 		callToUse = arguments[0];
 	}
@@ -536,7 +536,7 @@ StirFry.prototype.process = function () {
 	let callToUse = arguments[1];
 	// If there is only 1 argument
 
-	if (arguments.length == 1 || (typeof arguments[1] == "boolean" && arguments.length == 2)) {
+	if (arguments.length == 1 || typeof arguments[1] == "boolean" && arguments.length == 2) {
 		options = /.*/;
 		callToUse = arguments[0];
 	}
