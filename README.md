@@ -187,5 +187,5 @@ server.addListenerOnLayer('final', function(req, res) {
 
 ## About ##
 <a name="about"></a>
-StirFry and the documentation was written by Alex Waese-Perlman (I'm twelve ;))
+StirFry and the documentation was written by Alex Waese-Perlman (I'm thirteen ;))
 <br>Here's my website: http://www.squishy-banana.com
