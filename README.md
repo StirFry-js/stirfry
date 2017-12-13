@@ -1,4 +1,4 @@
-[![Stir Fry Logo](https://i.imgur.com/wclPQ7w.png)](https://github.com/StirFry-js/stirfry)
+[![StirFry Logo](https://i.imgur.com/wclPQ7w.png)](https://github.com/StirFry-js/stirfry)
 
 ___Fast___, ___lightweight___, ___self contained___, and ___easy to use___ web framework for [nodejs](http://nodejs.org).
 
