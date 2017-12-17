@@ -1,7 +1,10 @@
-# Stir Fry #
-Stir Fry is a ___fast___, ___lightweight___, ___self contained___, and ___easy to use___ web framework for nodejs.
-<br>
-npm: https://www.npmjs.com/package/stirfry
+[![StirFry Logo](https://i.imgur.com/wclPQ7w.png)](https://github.com/StirFry-js/stirfry)
+
+___Fast___, ___lightweight___, ___self contained___, and ___easy to use___ web framework for [nodejs](http://nodejs.org).
+
+[![NPM Version][npm-image]][npm-url]
+[![NPM Downloads][downloads-image]][downloads-url]
+
 ## Table Of Contents ##
  * [What is this?](#whatisthis)
  * [Quick Start](#quickstart)
@@ -185,7 +188,17 @@ server.addListenerOnLayer('final', function(req, res) {
 });
 ```
 
-## About ##
-<a name="about"></a>
-StirFry and the documentation was written by Alex Waese-Perlman (I'm thirteen ;))
-<br>Here's my website: http://www.squishy-banana.com
+## People
+
+The original author of Stir Fry is [Alex Waese-Perlman](http://www.squishy-banana.com)
+
+[List of all contributors](https://github.com/StirFry-js/stirfry/graphs/contributors)
+
+## License
+
+  [MIT](LICENSE)
+
+[npm-image]: https://img.shields.io/npm/v/stirfry.svg
+[npm-url]: https://npmjs.org/package/stirfry
+[downloads-image]: https://img.shields.io/npm/dm/stirfry.svg
+[downloads-url]: https://npmjs.org/package/stirfry
