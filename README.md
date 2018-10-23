@@ -15,6 +15,7 @@ ___Fast___, ___lightweight___, ___self contained___, and ___easy to use___ web f
 Stir Fry is a framework for making web servers in nodejs. It enables you to quickly and easily create web apps and servers. So, here is how to create one:
 
 The first step is to create a server program that uses Stir Fry. Start by creating a folder, you can call it anything you want.
+Note:Make sure you have Node install in your machine/computer or click here to download https://nodejs.org/en/download/
 
 Next navigate to that folder in terminal and run this command:<br>
 `npm install stirfry`<br>
@@ -27,8 +28,9 @@ server.request(function (request, response) {
     response.send("Hello World!");
 });
 ```
-To run it, type:
+To run this 'server.js' , type:
 `node server.js`<br>
+make sure you are in the same directory that has the Server.js file in the terminal<br>
 If that doesn't work, try:
 `nodejs server.js`<br>
 If that doesn't work, you must install nodejs.<br>
