@@ -29,7 +29,7 @@ server.request(function (request, response) {
     response.send("Hello World!");
 });
 ```
-To run this `server.js` , type:
+To run `server.js`, type:
 `node server.js`<br>
 make sure you are in the same directory that has the `server.js` file in the terminal<br>
 If that doesn't work, try:
