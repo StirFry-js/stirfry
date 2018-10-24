@@ -16,6 +16,8 @@ Stir Fry is a framework for making web servers in nodejs. It enables you to quic
 
 The first step is to create a server program that uses Stir Fry. Start by creating a folder, you can call it anything you want.
 
+Make sure you have Node.js installed on your computer. https://nodejs.org/en/download/
+
 Next navigate to that folder in terminal and run this command:<br>
 `npm install stirfry`<br>
 That installs Stir Fry into the folder your server is running from. Next create a file called `server.js` and open it with your favourite code editor. Add this code: <br>
@@ -27,8 +29,9 @@ server.request(function (request, response) {
     response.send("Hello World!");
 });
 ```
-To run it, type:
+To run this `server.js` , type:
 `node server.js`<br>
+make sure you are in the same directory that has the `server.js` file in the terminal<br>
 If that doesn't work, try:
 `nodejs server.js`<br>
 If that doesn't work, you must install nodejs.<br>
